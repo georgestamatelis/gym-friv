@@ -1,3 +1,34 @@
+from gym_slitherin.envs.hill_climber_env import VIEWPORT_H, VIEWPORT_W
+import sys
+import math
+import numpy as np
+
+import Box2D
+from Box2D.b2 import fixtureDef
+from Box2D.b2 import polygonShape
+from Box2D.b2 import contactListener
+from Box2D import (b2ContactListener, b2DestructionListener, b2DrawExtended)
+from Box2D import (b2CircleShape, b2EdgeShape, b2FixtureDef, b2PolygonShape,b2_pi)
+
+import gym
+from gym import spaces
+from gym.envs.box2d.car_dynamics import Car
+from gym.utils import seeding, EzPickle
+
+import pyglet
+
+pyglet.options["debug_gl"] = False
+from pyglet import gl
+
+
+VIEWPORT_W = 1000
+VIEWPORT_H = 800
+
+SCALE = 6.0  
+FPS = 60  # Frames per second
+
+
+
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """
@@ -7,8 +38,60 @@ http://www.iforce2d.net/b2dtut/top-down-car
 
 from Box2D.examples.framework import (Framework, Keys, main)
 import math
+class myContactListener(b2ContactListener):
+    def __init__(self,env):
+        b2ContactListener.__init__(self)
+        self.env=env
+    def handle_contact(self, contact, began):
+    # A contact happened -- see if a wheel hit a
+    # ground area
+        fixture_a = contact.fixtureA
+        fixture_b = contact.fixtureB
 
+        body_a, body_b = fixture_a.body, fixture_b.body
+        ud_a, ud_b = body_a.userData, body_b.userData
+        if not ud_a or not ud_b:
+            return
+        if ud_a=="Car" or ud_a == "Tire":
+            if ud_b=="Pavement":
+                self.env.hasLost=True 
+            if ud_b == "Boundary":
+                self.env.hasLost=True 
+            #if ud_b == "Spot":
+            #    self.env.hasWon=True
+        if ud_b == "Car" or ud_b == "Tire":
+            if ud_a == "Pavement":
+                self.env.hasLost=True
+            if ud_a == "Boundary":
+                self.env.hasLost=True
+            #if ud_a == " Spot":
+            #    self.env.hasWon=True
+        if ud_a== "Car" and ud_b == "Spot":
+            self.env.hasWon=True
+        if ud_b=="Car" and ud_a == "Spot":
+            self.env.hasWon=True
+        """tire = None
+        ground_area = None
+        for ud in (ud_a, ud_b):
+            obj = ud['obj']
+            if isinstance(obj, TDTire):
+                tire = obj
+            elif isinstance(obj, TDGroundArea):
+                ground_area = obj
 
+        if ground_area is not None and tire is not None:
+            if began:
+                tire.add_ground_area(ground_area)
+            else:
+                tire.remove_ground_area(ground_area)
+        """
+    def BeginContact(self, contact):
+        self.handle_contact(contact, True)
+        
+    def EndContact(self, contact):
+        self.handle_contact(contact, False)
+    def PostSolve(self, contact, impulse):
+        pass
 class TDGroundArea(object):
     """
     An area on the ground that the car can run over
@@ -38,7 +121,7 @@ class TDTire(object):
 
         self.body = world.CreateDynamicBody(position=position)
         self.body.CreatePolygonFixture(box=dimensions, density=density)
-        self.body.userData = {'obj': self}
+        self.body.userData ="Tire"
 
     @property
     def forward_velocity(self):
@@ -131,25 +214,25 @@ class TDTire(object):
 class TDCar(object):
     vertices = [(0.0,-1.0),
                 (0.0,6.5),
-                (2.5,0.0),
-                (2.5,6.5)
+                (3.5,-1.0),
+                (3.5,6.5)
                 ]
 
     tire_anchors = [(0.0,0.0),
                     (0.0, 5.5),
-                    (2.5, 0.0),
-                    (2.5, 5.5),
+                    (3.5, 0.0),
+                    (3.5, 5.5),
                     ]
 
     def __init__(self, world, vertices=None,
-                 tire_anchors=None, density=0.1, position=(0, 0),
+                 tire_anchors=None, density=0.1, position=(30,0),
                  **tire_kws):
         if vertices is None:
             vertices = TDCar.vertices
 
         self.body = world.CreateDynamicBody(position=position)
         self.body.CreatePolygonFixture(vertices=vertices, density=density)
-        self.body.userData = {'obj': self}
+        self.body.userData = "Car"
 
         self.tires = [TDTire(self, **tire_kws) for i in range(4)]
 
@@ -172,11 +255,6 @@ class TDCar(object):
 
             tire.body.position = self.body.worldCenter + anchor
             joints.append(j)
-        for tire in self.tires:
-            print("tire pos=",tire.body.position)
-        print("------------------------------------")
-        for tire in [self.tires[1],self.tires[3]]:
-            print("tire pos=",tire.body.position)
 
     def update(self, keys, hz):
         for tire in self.tires:
@@ -211,100 +289,3 @@ class TDCar(object):
         # Rotate the tires by locking the limits:
         front_left_joint.SetLimits(new_angle, new_angle)
         front_right_joint.SetLimits(new_angle, new_angle)
-
-
-class TopDownCar (Framework):
-    name = "Top Down Car"
-    description = "Keys: accel = w, reverse = s, left = a, right = d"
-
-    def __init__(self):
-        super(TopDownCar, self).__init__()
-        # Top-down -- no gravity in the screen plane
-        self.world.gravity = (0, 0)
-
-        self.key_map = {Keys.K_w: 'up',
-                        Keys.K_s: 'down',
-                        Keys.K_a: 'left',
-                        Keys.K_d: 'right',
-                        }
-
-        # Keep track of the pressed keys
-        self.pressed_keys = set()
-
-        # The walls
-        boundary = self.world.CreateStaticBody(position=(0, 20))
-        boundary.CreateEdgeChain([(-30, -30),
-                                  (-30, 30),
-                                  (30, 30),
-                                  (30, -30),
-                                  (-30, -30)]
-                                 )
-
-        # A couple regions of differing traction
-        self.car = TDCar(self.world)
-        gnd1 = self.world.CreateStaticBody(userData={'obj': TDGroundArea(0.5)})
-        fixture = gnd1.CreatePolygonFixture(
-            box=(9, 7, (-10, 15), math.radians(20)))
-        # Set as sensors so that the car doesn't collide
-        fixture.sensor = True
-
-        gnd2 = self.world.CreateStaticBody(userData={'obj': TDGroundArea(0.2)})
-        fixture = gnd2.CreatePolygonFixture(
-            box=(9, 5, (5, 20), math.radians(-40)))
-        fixture.sensor = True
-
-    def Keyboard(self, key):
-        key_map = self.key_map
-        if key in key_map:
-            self.pressed_keys.add(key_map[key])
-        else:
-            super(TopDownCar, self).Keyboard(key)
-
-    def KeyboardUp(self, key):
-        key_map = self.key_map
-        if key in key_map:
-            self.pressed_keys.remove(key_map[key])
-        else:
-            super(TopDownCar, self).KeyboardUp(key)
-
-    def handle_contact(self, contact, began):
-        # A contact happened -- see if a wheel hit a
-        # ground area
-        fixture_a = contact.fixtureA
-        fixture_b = contact.fixtureB
-
-        body_a, body_b = fixture_a.body, fixture_b.body
-        ud_a, ud_b = body_a.userData, body_b.userData
-        if not ud_a or not ud_b:
-            return
-
-        tire = None
-        ground_area = None
-        for ud in (ud_a, ud_b):
-            obj = ud['obj']
-            if isinstance(obj, TDTire):
-                tire = obj
-            elif isinstance(obj, TDGroundArea):
-                ground_area = obj
-
-        if ground_area is not None and tire is not None:
-            if began:
-                tire.add_ground_area(ground_area)
-            else:
-                tire.remove_ground_area(ground_area)
-
-    def BeginContact(self, contact):
-        self.handle_contact(contact, True)
-
-    def EndContact(self, contact):
-        self.handle_contact(contact, False)
-
-    def Step(self, settings):
-        self.car.update(self.pressed_keys, settings.hz)
-        super(TopDownCar, self).Step(settings)
-
-        tractions = [tire.current_traction for tire in self.car.tires]
-        self.Print('Current tractions: %s' % tractions)
-
-if __name__ == "__main__":
-    main(TopDownCar)
