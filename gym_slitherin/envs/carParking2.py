@@ -68,6 +68,9 @@ class carParking2(gym.Env, EzPickle):
         )
                 # The walls
         self.obs=[]
+        self.tires=[]
+        self.cars=[]
+        self.grounds=[]
     def seed(self, seed=None):
         self.np_random, seed = seeding.np_random(seed)
         return [seed]
@@ -88,6 +91,9 @@ class carParking2(gym.Env, EzPickle):
 
     def reset(self):
         self._destroy()
+        self.tires=[]
+        self.cars=[]
+        self.grounds=[]
         self.hasLost=False
         self.hasWon=False
         self.boundary = self.world.CreateStaticBody(position=(0, 0))
@@ -100,60 +106,72 @@ class carParking2(gym.Env, EzPickle):
         self.boundary.color=(0.5,0,0.5)
         self.boundary.userData="Boundary"
         self.obs.append(self.boundary)
+        self.grounds.append(self.boundary)
         # A couple regions of differing traction
         self.car = TDCar(self.world,position=(90,-40))
         self.car.body.color=Box2D.b2Color(0.2,0.7, 0)
 
         self.obs.append(self.car.body)
+        self.cars.append(self.car.body)
         for t in self.car.tires:
             t.color=Box2D.b2Color(0,0,0)
             self.obs.append(t.body)
+            self.tires.append(t.body)
         #add aditional cars 
         #car 2
         self.car2 = TDCar(self.world,position=(-20,-30))
         self.car2.body.color=Box2D.b2Color(0.9,0.1, 0)
         self.car2.body.userData="Pavement"
-    
+        self.cars.append(self.car2.body)
         self.obs.append(self.car2.body)
         for t in self.car2.tires:
             t.color=Box2D.b2Color(0,0,0)
             self.obs.append(t.body)
+            self.tires.append(t.body)
         #car 3
         self.car3 = TDCar(self.world,position=(-30,-30))
         self.car3.body.color=Box2D.b2Color(0.9,0.1, 0)
         self.car3.body.userData="Pavement"
     
         self.obs.append(self.car3.body)
+        self.cars.append(self.car3.body)
         for t in self.car3.tires:
             t.color=Box2D.b2Color(0,0,0)
             self.obs.append(t.body)
+            self.tires.append(t.body)
         #car 4
         self.car4 = TDCar(self.world,position=(-10,-30))
         self.car4.body.color=Box2D.b2Color(0.7,0.7, 0.7)
         self.car4.body.userData="Pavement"
     
         self.obs.append(self.car4.body)
+        self.cars.append(self.car4.body)
         for t in self.car4.tires:
             t.color=Box2D.b2Color(0,0,0)
             self.obs.append(t.body)
+            self.tires.append(t.body)
         #car 5
         self.car5 = TDCar(self.world,position=(-45,-50))
         self.car5.body.color=Box2D.b2Color(0.9,0.1, 0)
         self.car5.body.userData="Pavement"
     
         self.obs.append(self.car5.body)
+        self.cars.append(self.car5.body)
         for t in self.car5.tires:
             t.color=Box2D.b2Color(0,0,0)
             self.obs.append(t.body)
+            self.tires.append(t.body)
         #car 6
         self.car6 = TDCar(self.world,position=(-25,20))
         self.car6.body.color=Box2D.b2Color(0.0,0.7, 0)
         self.car6.body.userData="Pavement"
     
         self.obs.append(self.car6.body)
+        self.cars.append(self.car6.body)
         for t in self.car6.tires:
             t.color=Box2D.b2Color(0,0,0)
             self.obs.append(t.body)
+            self.tires.append(t.body)
         
         #this is the goal parking spot
         self.gnd1 = self.world.CreateStaticBody()
@@ -163,6 +181,7 @@ class carParking2(gym.Env, EzPickle):
         self.gnd1.userData="Spot"
         # Set as sensors so that the car doesn't collide
         fixture.sensor = True
+        self.grounds.append(self.gnd1)
         self.obs.append(self.gnd1)
         #first obstacle
         self.gnd2 = self.world.CreateStaticBody()
@@ -171,6 +190,8 @@ class carParking2(gym.Env, EzPickle):
         fixture.sensor = True
         self.gnd2.color=Box2D.b2Color(0, 0, 0.7)
         self.gnd2.userData="Pavement"
+        self.grounds.append(self.gnd2)
+
         self.obs.append(self.gnd2)
 
         #sekecond obstacle
@@ -186,6 +207,7 @@ class carParking2(gym.Env, EzPickle):
         self.gnd3.color=Box2D.b2Color(0, 0, 0.7)
         self.gnd3.userData="Pavement"
         self.obs.append(self.gnd3)
+        self.grounds.append(self.gnd3)
 
         #third obstacle 
 
@@ -196,6 +218,7 @@ class carParking2(gym.Env, EzPickle):
         self.gnd4.color=Box2D.b2Color(0, 0, 0.7)
         self.gnd4.userData="Pavement"
         self.obs.append(self.gnd4)
+        self.grounds.append(self.gnd4)
 
 
         #fourth obstacle
@@ -210,6 +233,8 @@ class carParking2(gym.Env, EzPickle):
         self.gnd5.userData="Pavement"
 
         self.obs.append(self.gnd5)
+        self.grounds.append(self.gnd5)
+
         #fifth obstacle
         self.gnd6 = self.world.CreateStaticBody()
         fixture = self.gnd6.CreatePolygonFixture(
@@ -218,6 +243,8 @@ class carParking2(gym.Env, EzPickle):
         self.gnd6.color=Box2D.b2Color(0, 0, 0.7)
         self.gnd6.userData="Pavement"
         self.obs.append(self.gnd6)
+        self.grounds.append(self.gnd6)
+
 
         self.gnd7 = self.world.CreateStaticBody()
         fixture = self.gnd7.CreatePolygonFixture(
@@ -226,6 +253,8 @@ class carParking2(gym.Env, EzPickle):
         self.gnd7.color=Box2D.b2Color(0, 0, 0.7)
         self.gnd7.userData="Pavement"
         self.obs.append(self.gnd7)
+        self.grounds.append(self.gnd7)
+
 
         return self.step([2,2])[0]
 
@@ -297,7 +326,7 @@ class carParking2(gym.Env, EzPickle):
             self.viewer.set_bounds(-350/SCALE, (VIEWPORT_W-350)/SCALE, -450/SCALE, (VIEWPORT_H-450)/SCALE)
 
 
-        for obj in self.obs:
+        for obj in self.grounds:
             if obj.userData=="Car":
                 continue
             if not hasattr( obj,'fixtures'):
@@ -321,32 +350,52 @@ class carParking2(gym.Env, EzPickle):
                         self.viewer.draw_polygon(tv)
             #if obj.userData=="fuelTank":
             #    print("rendering Tank")
-            for f in self.car.body.fixtures:
-                trans = f.body.transform
-                if type(f.shape) is b2CircleShape:
-                    #if obj.userData=="fuelTank":
-                    #    print("rendering Tank")
-                    t = rendering.Transform(translation=trans*f.shape.pos)
-                    self.viewer.draw_circle(f.shape.radius,color=self.car.body.color).add_attr(t)
-                if type(f.shape) is b2EdgeShape:
-                    #for v in f.shape.vertices:
-                    #    print(v)
-                    self.viewer.draw_line(
-                        f.shape.vertices[0],f.shape.vertices[1],
-                        color=self.car.body.color)
-                if type(f.shape) is b2PolygonShape:
-                    tv = [trans*v for v in f.shape.vertices]
-                    if hasattr(obj,"color"):
-                        self.viewer.draw_polygon(tv,color=self.car.body.color)
-                    else:
-                        self.viewer.draw_polygon(tv)
+            for obj in self.tires:
+                if not hasattr( obj,'fixtures'):
+                    continue
+                for f in obj.fixtures:
+                    trans = f.body.transform
+                    if type(f.shape) is b2CircleShape:
+                        #if obj.userData=="fuelTank":
+                        #    print("rendering Tank")
+                        t = rendering.Transform(translation=trans*f.shape.pos)
+                        self.viewer.draw_circle(f.shape.radius,color=obj.color).add_attr(t)
+                    if type(f.shape) is b2EdgeShape:
+                        #for v in f.shape.vertices:
+                        #    print(v)
+                        self.viewer.draw_line(f.shape.vertices[0],f.shape.vertices[1],color=obj.color)
+                    if type(f.shape) is b2PolygonShape:
+                        tv = [trans*v for v in f.shape.vertices]
+                        if hasattr(obj,"color"):
+                            self.viewer.draw_polygon(tv,color=obj.color)
+                        else:
+                            self.viewer.draw_polygon(tv)
+            for obj in self.cars:
+                for f in obj.fixtures:
+                    trans = f.body.transform
+                    if type(f.shape) is b2CircleShape:
+                        #if obj.userData=="fuelTank":
+                        #    print("rendering Tank")
+                        t = rendering.Transform(translation=trans*f.shape.pos)
+                        self.viewer.draw_circle(f.shape.radius,color=obj.color).add_attr(t)
+                    if type(f.shape) is b2EdgeShape:
+                        #for v in f.shape.vertices:
+                        #    print(v)
+                        self.viewer.draw_line(
+                            f.shape.vertices[0],f.shape.vertices[1],
+                            color=obj.color)
+                    if type(f.shape) is b2PolygonShape:
+                        tv = [trans*v for v in f.shape.vertices]
+                        if hasattr(obj,"color"):
+                            self.viewer.draw_polygon(tv,color=obj.color)
+                        else:
+                            self.viewer.draw_polygon(tv)
 
         if mode=="rgb_array":       
             arr= self.viewer.get_array()#viewer.render(return_rgb_array=True)
             return arr 
         if mode=="human":
             return self.viewer.render()
-       
     def checkParking(self):
         count=0
         for t in self.car.tires:
@@ -363,7 +412,7 @@ class carParking2(gym.Env, EzPickle):
                 elif ud_a == "Spot" and ud_b=="Tire":
                     count+=1
         #print("fookin count=",count)
-        if count==4:
+        if count==4 and -1 <= self.car.body.linearVelocity[0]<=1:
             return True
         return False
     def close(self):
