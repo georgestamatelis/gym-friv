@@ -9,8 +9,8 @@ from stable_baselines3.common.env_checker import check_env
 from stable_baselines3.common.noise import NormalActionNoise
 import numpy as np
 
-env = gym.make("gym_slitherin:CarParking-v2")
-#env = gym.make("gym_slitherin:slitherin-v2")
+env = gym.make("gym_slitherin:zombieOnslaught-v0") 
+
 print("fIRST WILL CHECK IF ENV IS OK")
 check_env(env)
 
@@ -18,15 +18,15 @@ check_env(env)
 #                     net_arch=[dict(pi=[32, 32], vf=[32, 32])])
 print("NOW WILL TRAIN THE MODEL")
 
-#model = DQN('CnnPolicy',env,verbose=1,buffer_size=10000,optimize_memory_usage=True,learning_starts=1000)
-model = A2C('CnnPolicy', env, verbose=1) 
+model = DQN('CnnPolicy',env,verbose=1,buffer_size=2000,optimize_memory_usage=True,learning_starts=1000)#
+#model = A2C('CnnPolicy', env, verbose=1) 
 model.learn(total_timesteps=100000) 
 print("learning done")
-model.save("a2c-CarParking")
+model.save("DQN-ZOMBIE")
 #print("model Saved")
 obs = env.reset()
 for i in range(100000):
-    action, _states = model.predict(obs.copy())
+    action, _states = model.predict(obs.copy(),deterministic=True)
     obs, rewards, dones, info = env.step(action)
     print("action=",action,"reward=",rewards)
     env.render()

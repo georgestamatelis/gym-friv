@@ -19,7 +19,7 @@ import pyglet
 
 pyglet.options["debug_gl"] = False
 from pyglet import gl
-from topDownCar import *
+#from topDownCar import *
 
 VIEWPORT_W = 1000
 VIEWPORT_H = 800

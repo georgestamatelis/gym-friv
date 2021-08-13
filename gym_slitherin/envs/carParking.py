@@ -37,7 +37,7 @@ http://www.iforce2d.net/b2dtut/top-down-car
 """
 
 import math
-from topDownCar import *
+#from topDownCar import *
 
 
 class CarParking(gym.Env, EzPickle):
