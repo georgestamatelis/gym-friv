@@ -214,7 +214,7 @@ class chickenGoEnv(Env):
         """
         add forward cars
         """
-        """
+        
         if self.timeStep % 170==0 or self.timeStep==50 or self.timeStep == 120:
             car=Truck("Car",self.x_max,self.x_min,self.y_max,self.y_min)
             car.set_position(150,-10)
@@ -246,7 +246,7 @@ class chickenGoEnv(Env):
             car.set_position(590,440)
             self.backwardCars.append(car)
             self.elements.append(car)
-        """
+        
         if self.timeStep % 140 ==0 :
             l= log("log",self.x_max,self.x_min,self.y_max,self.y_min)
             l.set_position(350,440)

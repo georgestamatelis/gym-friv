@@ -18,8 +18,8 @@ check_env(env)
 #                     net_arch=[dict(pi=[32, 32], vf=[32, 32])])
 print("NOW WILL TRAIN THE MODEL")
 
-model = DQN('CnnPolicy',env,verbose=1,buffer_size=2000,optimize_memory_usage=True,learning_starts=1000)#
-#model = A2C('CnnPolicy', env, verbose=1) 
+#model = DQN('CnnPolicy',env,verbose=1,buffer_size=2000,optimize_memory_usage=True,learning_starts=1000)#
+model = PPO('CnnPolicy', env, verbose=1) 
 model.learn(total_timesteps=100000) 
 print("learning done")
 model.save("DQN-ZOMBIE")
