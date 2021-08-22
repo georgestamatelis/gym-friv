@@ -5,13 +5,12 @@ pygame.init()
 
 win = pygame.display.set_mode((900,700))
 
-pygame.display.set_caption("Agent Platformer")
-
-walkRight = [pygame.image.load('R1.png'), pygame.image.load('R2.png'), pygame.image.load('R3.png'), pygame.image.load('R4.png'), pygame.image.load('R5.png'), pygame.image.load('R6.png'), pygame.image.load('R7.png'), pygame.image.load('R8.png'), pygame.image.load('R9.png')]
-walkLeft = [pygame.image.load('L1.png'), pygame.image.load('L2.png'), pygame.image.load('L3.png'), pygame.image.load('L4.png'), pygame.image.load('L5.png'), pygame.image.load('L6.png'), pygame.image.load('L7.png'), pygame.image.load('L8.png'), pygame.image.load('L9.png')]
-bg = pygame.image.load('agentPlatformerBG.png')
+assetsPath="/home/georgestamatelis/gym-slitherin/Game/"
+walkRight = [pygame.image.load(assetsPath+'R1.png'), pygame.image.load(assetsPath+'R2.png'), pygame.image.load(assetsPath+'R3.png'), pygame.image.load(assetsPath+'R4.png'), pygame.image.load(assetsPath+'R5.png'), pygame.image.load(assetsPath+'R6.png'), pygame.image.load(assetsPath+'R7.png'), pygame.image.load(assetsPath+'R8.png'), pygame.image.load(assetsPath+'R9.png')]
+walkLeft = [pygame.image.load(assetsPath+'L1.png'), pygame.image.load(assetsPath+'L2.png'), pygame.image.load(assetsPath+'L3.png'), pygame.image.load(assetsPath+'L4.png'), pygame.image.load(assetsPath+'L5.png'), pygame.image.load(assetsPath+'L6.png'), pygame.image.load(assetsPath+'L7.png'), pygame.image.load(assetsPath+'L8.png'), pygame.image.load(assetsPath+'L9.png')]
+bg = pygame.image.load(assetsPath+'agentPlatformerBG.png')
 bg = pygame.transform.scale(bg,(900,700))
-char = pygame.image.load('standing.png')
+char = pygame.image.load(assetsPath+'standing.png')
 
 clock = pygame.time.Clock()
 
@@ -101,7 +100,7 @@ class Spikes(object):
         self.height = height
         self.color=color
         self.hitbox = (self.x, self.y,self.width,self.height)
-        self.img=pygame.image.load("nails.png")
+        self.img=pygame.image.load(assetsPath+"nails.png")
         self.img=pygame.transform.scale(self.img,(50,50))
 
     def draw(self,win):
@@ -127,7 +126,7 @@ class Vacum(object):
         self.height = height
         self.color=color
         self.hitbox = (self.x, self.y,self.width,self.height)
-        self.img=pygame.image.load("platformVacum.png")
+        self.img=pygame.image.load(assetsPath+"platformVacum.png")
         self.img=pygame.transform.scale(self.img,(self.width,self.height))
 
     def draw(self,win):
@@ -150,7 +149,6 @@ def redrawGameWindow():
     pygame.draw.rect(win, (0,128,0), (10,10, 50 - (5 * (10 -0.1*man.fuelLeft )), 20))
     text = font.render('Score: ' + str(score), 1, (0,0,0))
     win.blit(text, (390, 10))
-    man.draw(win)
     for b in blocks:
         b.draw(win)
     for s in spikes:
@@ -159,6 +157,7 @@ def redrawGameWindow():
         v.draw(win)
     for c in coins:
         c.draw(win)
+    man.draw(win)
     goalBlock.draw(win)
     #redRect=(10,10,50,20)
     #pygame.draw.rect(win,(255,0,0),redRect)

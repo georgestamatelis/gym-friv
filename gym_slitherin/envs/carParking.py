@@ -2,6 +2,7 @@ from gym_slitherin.envs.hill_climber_env import VIEWPORT_H, VIEWPORT_W
 import sys
 import math
 import numpy as np
+import cv2
 
 import Box2D
 from Box2D.b2 import fixtureDef
@@ -22,7 +23,9 @@ from pyglet import gl
 
 
 VIEWPORT_W = 1000
-VIEWPORT_H = 800
+VIEWPORT_H = 1000
+STATE_W = 96  # less than Atari 160x192
+STATE_H = 96
 
 SCALE = 6.0  
 FPS = 60  # Frames per second
@@ -37,7 +40,7 @@ http://www.iforce2d.net/b2dtut/top-down-car
 """
 
 import math
-#from topDownCar import *
+from gym_slitherin.envs.topDownCar import *
 
 
 class CarParking(gym.Env, EzPickle):
@@ -58,11 +61,11 @@ class CarParking(gym.Env, EzPickle):
         #steering : noop, left right
         #gass     : noop, forward backward
 
-        self.action_space = spaces.MultiDiscrete([3,3])
+        self.action_space = spaces.Discrete(9)
         
 
         self.observation_space = spaces.Box(
-            low=0, high=255, shape=(VIEWPORT_H, VIEWPORT_W, 3), dtype=np.uint8
+            low=0, high=255, shape=(STATE_H,STATE_W, 3), dtype=np.uint8
         )
                 # The walls
         self.obs=[]
@@ -202,7 +205,7 @@ class CarParking(gym.Env, EzPickle):
         self.grounds.append(self.gnd6)
 
 
-        return self.step([2,2])[0]
+        return self.step(None)[0]
 
     def step(self, action):
         #a[1] is about gass
@@ -269,7 +272,7 @@ class CarParking(gym.Env, EzPickle):
             from gym.envs.classic_control import rendering
 
             self.viewer = rendering.Viewer(VIEWPORT_W, VIEWPORT_H)
-            self.viewer.set_bounds(-350/SCALE, (VIEWPORT_W-350)/SCALE, -450/SCALE, (VIEWPORT_H-450)/SCALE)
+            self.viewer.set_bounds(-350, (VIEWPORT_W-350), -450, (VIEWPORT_H-450))
 
 
         for obj in self.grounds:
@@ -339,6 +342,7 @@ class CarParking(gym.Env, EzPickle):
 
         if mode=="rgb_array":       
             arr= self.viewer.get_array()#viewer.render(return_rgb_array=True)
+            arr=cv2.resize(arr,(STATE_H,STATE_W))
             return arr 
         if mode=="human":
             return self.viewer.render()
