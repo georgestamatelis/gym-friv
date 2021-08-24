@@ -1,6 +1,6 @@
 
 from gym_slitherin.envs.goChickenGo import chickenGoEnv
-from gym_slitherin.envs.zombieOnslaught import zombieOnslaught
+from gym_slitherin.envs.zombieOnslaught import zombieOnslaughtEasyEnv
 from gym_slitherin.envs.hill_climber_env import Hill_Climber_Env
 
 from gym_slitherin.envs.carParking import CarParking

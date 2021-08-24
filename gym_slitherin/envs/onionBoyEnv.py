@@ -18,7 +18,7 @@ from gym.utils import seeding, EzPickle
 from gym_slitherin.envs.onionClasses import *
 
 #from topDownCar import *
-FPS=1
+FPS=27
 
 
 pygame.init()
@@ -28,8 +28,8 @@ pygame.display.set_caption("onionBoy")
 
 
 
-STATE_W = 100  # less than Atari 160x192
-STATE_H = 100
+STATE_W = 130  # less than Atari 160x192
+STATE_H = 130
 class onionBoyEnv(gym.Env, EzPickle):
     metadata = {
         "render.modes": ["human", "rgb_array", "state_pixels"],
@@ -58,7 +58,7 @@ class onionBoyEnv(gym.Env, EzPickle):
         self.observation_space = spaces.Box(
             low=0, high=255, shape=(STATE_H,STATE_W, 3), dtype=np.uint8
         )
-
+        self.maxTimeSteps=5000
     def _destroy(self):
         """
         """
@@ -121,7 +121,7 @@ class onionBoyEnv(gym.Env, EzPickle):
         self.WoodenBlocks.append(WoodenBlock(1660,220,75,100))
         self.flyingEnemies.append(flyingEnemy(1660,150,50,25,230))
 
-        self.blocks.append(Block(1800,180,300,140,hard=False))
+        self.blocks.append(Block(1800,195,300,140,hard=False))
         for w in [2170,2200,2230,2260]:
             for h in [150,120]:
                 self.coins.append(Coin(w,h,10))
@@ -149,6 +149,14 @@ class onionBoyEnv(gym.Env, EzPickle):
         self.WoodenBlocks.append(WoodenBlock(4000,250,75,70))
 
         self.blocks.append(Block(4450,300,1000,140,hard=True))
+        e=enemy(4150,300,50,50,4450)
+        self.enemies.append(e)
+        e=enemy(4150,300,50,50,4450)
+        e.x=4233
+        self.enemies.append(e)
+        e=enemy(4150,300,50,50,4450)
+        e.x=4317
+        self.enemies.append(e)
         for w in [4510,4550,4590,4630]:
             self.boxes.append(Box(w,200,20))
         self.WoodenBlocks.append(WoodenBlock(4700,230,75,70))
@@ -186,7 +194,7 @@ class onionBoyEnv(gym.Env, EzPickle):
         self.enemies.append(e)
 
         e=enemy(850,140,50,500,500)
-        e.path=[500,1600]
+        e.path=[800,1000]
         e.vel=-1.5
         self.enemies.append(e)
 
@@ -280,7 +288,7 @@ class onionBoyEnv(gym.Env, EzPickle):
                 neg = 1
                 if self.man.jumpCount < 0:
                     neg = -1
-                self.man.y -= (self.man.jumpCount ** 2) * 0.65 * neg
+                self.man.y -= (self.man.jumpCount ** 2) *0.65* neg
                 self.man.jumpCount -= 1
             else:
                 self.man.isJump = False
@@ -293,6 +301,8 @@ class onionBoyEnv(gym.Env, EzPickle):
         for block in self.blocks:
             if block.manOnBlock(self.man): 
                 self.onBlock=True
+                #if self.man.y !=260:
+                #    print("man on fookin block",self.man.y)
         for wb in self.WoodenBlocks:
             if wb.manOnBlock(self.man):
                 self.onBlock=True
@@ -301,7 +311,7 @@ class onionBoyEnv(gym.Env, EzPickle):
                 self.onBlock=True
         #gravity
         if self.onBlock==False and self.man.y<self.ymin and self.man.isJump==False:
-            self.man.y+=self.man.vel
+            self.man.y+=10
                 
         for e in self.enemies:
             rectA=pygame.Rect(self.man.hitbox)
@@ -310,7 +320,7 @@ class onionBoyEnv(gym.Env, EzPickle):
                 if (self.man.y <=e.y-0.5*self.man.hitbox[3])  and self.man.isJump==False:
                     print("Enemy dead")
                     self.enemies.remove(e)
-                    reward+=0.1/13
+                    reward+=0.1/16
                 else:
                     print("GAME OVER")
                     reward=-1
@@ -431,7 +441,7 @@ class onionBoyEnv(gym.Env, EzPickle):
                     self.man.y-=20
                     self.man.isJump=True
                     pl.active=True
-        if self.timeSteps>=3000:
+        if self.timeSteps >self.maxTimeSteps:
             done=True
             reward=-1
             print("time run out")
@@ -443,10 +453,10 @@ class onionBoyEnv(gym.Env, EzPickle):
         return state
     def redraw(self, mode="human"):
         self.win.blit(bg, (bgx,bgy))
-        text='time left'+str(3000-self.timeSteps)
+        text=str(self.maxTimeSteps-self.timeSteps)
         textsurface = self.font.render(text, False, (0, 0, 0))
 
-        self.win.blit(textsurface,(0,0))
+        self.win.blit(textsurface,(25,25))
 
         for b in self.blocks:
             b.draw(self.win,self)

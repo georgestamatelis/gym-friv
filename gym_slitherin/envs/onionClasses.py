@@ -22,7 +22,7 @@ class player(object):
         self.y = y
         self.width = width
         self.height = height
-        self.vel = 5
+        self.vel = 7.5
         self.isJump = False
         self.left = False
         self.right = False
@@ -134,7 +134,7 @@ class enemy(object):
         else:
             self.path= [end,x]
         self.walkCount = 0
-        self.vel = 1.5
+        self.vel = 3.5
         self.hitbox = (self.x + 4, self.y, 45, 60)
 
     def draw(self, win,env):

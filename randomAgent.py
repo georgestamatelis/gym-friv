@@ -3,9 +3,9 @@ from gym.core import ActionWrapper
 import matplotlib.pyplot as plt
 
 
-#env = gym.make("gym_slitherin:slitherin-v2")
+env = gym.make("gym_slitherin:zombieOnslaught-v0") 
 #env = gym.make("gym_slitherin:CarParking-v0")
-env = gym.make("gym_slitherin:onionBoyEnv-v0") 
+#env = gym.make("gym_slitherin:onionBoyEnv-v0") 
 
 
 #rendered=env.render(mode="rgb_array")

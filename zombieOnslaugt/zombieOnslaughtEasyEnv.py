@@ -1,4 +1,4 @@
-#from gym_slitherin.envs.zombieOnslaught import zombieOnslaught
+from gym_slitherin.envs.zombieOnslaught import zombieOnslaught
 import numpy as np 
 import cv2 
 import matplotlib.pyplot as plt
@@ -11,7 +11,7 @@ import os
 from numpy.core.fromnumeric import reshape 
 from scipy import ndimage
 import pygame
-from gym_slitherin.envs.zombieClasses  import *
+from zombieClasses  import *
 
 
 from gym import Env, spaces
@@ -46,7 +46,7 @@ class zombieOnslaughtEasyEnv(gym.Env):
         self.observation_space = spaces.Box(
             low=0, high=255, shape=(STATE_H,STATE_W, 3), dtype=np.uint8
         )
-        self.zombiesToKill=6
+        self.zombiesToKill=3
         self.positions=[400,300,200]
         self.bg = pygame.image.load(assetsPath+'backround.png')
         self.bg = pygame.transform.scale(self.bg,(WINDOW_H,WINDOW_W))
@@ -56,7 +56,7 @@ class zombieOnslaughtEasyEnv(gym.Env):
     def reset(self):
         """
         """
-        #print("RESETING")
+        print("RESETING")
         self.zombiesKilled=0
         self.Crates=[]
         self.Crates.append(Crate(75,self.positions[0]+40,30,40,color=(100,40,0)))
@@ -69,11 +69,8 @@ class zombieOnslaughtEasyEnv(gym.Env):
         self.man=player(10,self.positions[0],50,50)
         #weak zombies
         self.weakZombies.append(weakZombie(500,self.positions[0],64,64))
-        self.weakZombies.append(weakZombie(550,self.positions[1],64,64))
-        self.weakZombies.append(weakZombie(570,self.positions[2],64,64))
         self.weakZombies.append(weakZombie(500,self.positions[1],64,64))
-        self.weakZombies.append(weakZombie(620,self.positions[1],64,64))
-        self.weakZombies.append(weakZombie(570,self.positions[0],64,64))
+        self.weakZombies.append(weakZombie(500,self.positions[2],64,64))
 
         self.shootReset=0
         self.run = True

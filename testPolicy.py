@@ -9,7 +9,8 @@ from stable_baselines3.common.env_checker import check_env
 from stable_baselines3.common.noise import NormalActionNoise
 import numpy as np
 
-env = gym.make("gym_slitherin:onionBoyEnv-v0") 
+#env = gym.make("gym_slitherin:onionBoyEnv-v0") 
+env = gym.make("gym_slitherin:zombieOnslaught-v0") 
 
 print("fIRST WILL CHECK IF ENV IS OK")
 check_env(env)
@@ -20,7 +21,7 @@ print("NOW WILL TRAIN THE MODEL")
 
 model = DQN('CnnPolicy',env,verbose=1,buffer_size=200000)#,optimize_memory_usage=True,learning_starts=1000)#
 #model = PPO('CnnPolicy', env, verbose=1) 
-model.learn(total_timesteps=750000) 
+model.learn(total_timesteps=2750000) 
 print("learning done")
 model.save("DQN-PLATFORMER")
 #print("model Saved")
