@@ -88,3 +88,30 @@ class weakZombie(object):
         self.x -=self.vel
         self.hitbox = (self.x -5, self.y, 40, 53)
         #pygame.draw.rect(win,(255,0,0),self.hitbox,2)
+class strongZombie(object):
+    images = [pygame.image.load(assetsPath+'Run1.png'), pygame.image.load(assetsPath+'Run2.png'), pygame.image.load(assetsPath+'Run3.png'), pygame.image.load(assetsPath+'Run4.png'), pygame.image.load(assetsPath+'Run5.png'), pygame.image.load(assetsPath+'Run6.png'), pygame.image.load(assetsPath+'Run7.png'), pygame.image.load(assetsPath+'Run8.png'), pygame.image.load(assetsPath+'Run9.png')]
+    
+    def __init__(self, x, y, width, height):
+        self.x = x
+        self.y = y
+        self.width = width
+        self.height = height
+        self.walkCount = 0
+        self.vel = 1
+        self.hitbox = (self.x -5, self.y, 40, 57)
+        self.HP=150
+
+    def draw(self, win):
+        self.move(win)
+        if self.walkCount + 1 >= 27:
+            self.walkCount = 0
+        
+        win.blit(self.images[self.walkCount//3], (self.x,self.y))
+        self.walkCount += 1
+        
+        #pygame.draw.rect(win,(255,0,0),self.hitbox,2)
+    
+    def move(self,win):
+        self.x -=self.vel
+        self.hitbox = (self.x -5, self.y, 40, 53)
+        #pygame.draw.rect(win,(255,0,0),self.hitbox,2)

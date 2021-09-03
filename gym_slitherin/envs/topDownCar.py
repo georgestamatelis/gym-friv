@@ -104,7 +104,7 @@ class TDGroundArea(object):
 class TDTire(object):
 
     def __init__(self, car, max_forward_speed=100.0,
-                 max_backward_speed=-20, max_drive_force=150,
+                 max_backward_speed=-20, max_drive_force=100,
                  turn_torque=15, max_lateral_impulse=3,
                  dimensions=(0.5, 1.25), density=1.0,
                  position=(0, 0)):

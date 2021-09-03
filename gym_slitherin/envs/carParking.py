@@ -28,7 +28,7 @@ STATE_W = 96  # less than Atari 160x192
 STATE_H = 96
 
 SCALE = 6.0  
-FPS = 60  # Frames per second
+FPS = 1  # Frames per second
 
 
 
@@ -99,11 +99,11 @@ class CarParking(gym.Env, EzPickle):
         self.hasLost=False
         self.hasWon=False
         self.boundary = self.world.CreateStaticBody(position=(0, 0))
-        self.boundary.CreateEdgeChain([(-50, -50),
-                                  (-50, 50),
-                                  (100, 50),
-                                  (100, -50),
-                                  (-50, -50)]
+        self.boundary.CreateEdgeChain([(-300, -300),
+                                  (-300, 300),
+                                  (600, 300),
+                                  (600, -300),
+                                  (-300, -300)]
                                  )
         self.boundary.color=(0.5,0,0.5)
         self.boundary.userData="Boundary"
@@ -121,6 +121,7 @@ class CarParking(gym.Env, EzPickle):
             self.tires.append(t.body)
         #add aditional cars 
         #car 2
+        """
         self.car2 = TDCar(self.world,position=(-20,-30))
         self.car2.body.color=Box2D.b2Color(0.9,0.1, 0)
         self.car2.body.userData="Pavement"
@@ -142,6 +143,7 @@ class CarParking(gym.Env, EzPickle):
             t.color=Box2D.b2Color(0,0,0)
             self.obs.append(t.body)
             self.tires.append(t.body)
+        """
         #this is the goal parking spot
         self.gnd1 = self.world.CreateStaticBody()
         fixture = self.gnd1.CreatePolygonFixture(
@@ -152,6 +154,8 @@ class CarParking(gym.Env, EzPickle):
         fixture.sensor = True
         self.grounds.append(self.gnd1)
         self.obs.append(self.gnd1)
+        """
+        
         #first obstacle
         self.gnd2 = self.world.CreateStaticBody()
         fixture = self.gnd2.CreatePolygonFixture(
@@ -204,7 +208,7 @@ class CarParking(gym.Env, EzPickle):
         self.obs.append(self.gnd6)
         self.grounds.append(self.gnd6)
 
-
+        """
         return self.step(None)[0]
 
     def step(self, action):
@@ -242,10 +246,10 @@ class CarParking(gym.Env, EzPickle):
         if action ==8 :
             keys.append("down")
             keys.append("right")
-        self.car.update(keys,60)
+        self.car.update(keys,50)
         #run a step of physics simulation
-        timeStep = 1.0 / 60 
-        vel_iters, pos_iters = 6, 2
+        timeStep = 1.0 / 50 
+        vel_iters, pos_iters = 5, 2
         self.world.Step(timeStep, vel_iters, pos_iters)
 
         self.state=self.render(mode="rgb_array")

@@ -1,6 +1,13 @@
+from gym_slitherin.envs.eyeCopterEnv1 import STATE_H
 import numpy as np 
+from os import fwalk
+from numpy.lib.function_base import trim_zeros
+import pygame
+import random
 import cv2 
 import matplotlib.pyplot as plt
+from gym.envs.classic_control import rendering
+
 import PIL.Image as Image
 import gym
 import random
@@ -9,379 +16,345 @@ from gym import Env, spaces
 import time
 import random
 font = cv2.FONT_HERSHEY_COMPLEX_SMALL 
+clock = pygame.time.Clock()
 
+assetsPath="/home/georgestamatelis/gym-slitherin/chickenGo/"
 
-#helper classes 
-class Point(object):
-    def __init__(self, name, x_max, x_min, y_max, y_min):
-        self.x = 0
-        self.y = 0
-        self.x_min = x_min
-        self.x_max = x_max
-        self.y_min = y_min
-        self.y_max = y_max
-        self.name = name
-    
-    def set_position(self, x, y):
-        self.x = self.clamp(x, self.x_min, self.x_max - self.icon_w)
-        self.y = self.clamp(y, self.y_min, self.y_max - self.icon_h)
-    
-    def get_position(self):
-        return (self.x, self.y)
-    
-    def move(self, del_x, del_y):
-        self.x += del_x
-        self.y += del_y
-        
-        self.x = self.clamp(self.x, self.x_min, self.x_max - self.icon_w)
-        self.y = self.clamp(self.y, self.y_min, self.y_max - self.icon_h)
+class Chicken(object):
+    walkRight = [pygame.image.load(assetsPath+'R1.png'), pygame.image.load(assetsPath+'R2.png'), pygame.image.load(assetsPath+'R3.png'), pygame.image.load(assetsPath+'R4.png'), pygame.image.load(assetsPath+'R5.png'), pygame.image.load(assetsPath+'R6.png'), pygame.image.load(assetsPath+'R7.png')]
+    walkLeft = [pygame.image.load(assetsPath+'L1.png'), pygame.image.load(assetsPath+'L2.png'), pygame.image.load(assetsPath+'L3.png'), pygame.image.load(assetsPath+'L4.png'), pygame.image.load(assetsPath+'L5.png'), pygame.image.load(assetsPath+'L6.png'), pygame.image.load(assetsPath+'L7.png')]
+    def __init__(self,x,y):
+        self.x = x
+        self.y = y
+        self.vel = 15
+        self.standing=True
+        self.movingRight=False
+        self.movingLeft=False
+        self.walkCount = 0
+        self.hitbox = (self.x,self.y, 44, 40)
 
-    def clamp(self, n, minn, maxn):
-        return max(min(maxn, n), minn)
+    def draw(self, win):
+        if self.walkCount + 1 >= 21:
+            self.walkCount = 0
+        if self.standing==True:
+            win.blit(self.walkRight[0], (self.x,self.y))
 
-    
-class Chicken(Point):
-    def __init__(self, name, x_max, x_min, y_max, y_min):
-        super(Chicken, self).__init__(name, x_max, x_min, y_max, y_min)
-        img_name="/home/georgestamatelis/gym-slitherin/gym_slitherin/envs/bird.png"
-        self.icon = cv2.imread(img_name)/ 255.0
-        self.icon_w = 20
-        self.icon_h = 20
-        self.icon = cv2.resize(self.icon, (self.icon_h, self.icon_w))
-class Truck(Point):
-    def __init__(self, name, x_max, x_min, y_max, y_min):
-        super(Truck, self).__init__(name, x_max, x_min, y_max, y_min)
-        img_name="/home/georgestamatelis/gym-slitherin/gym_slitherin/envs/pinkTruck.png"
-        self.icon = cv2.imread(img_name)/ 255.0
-        self.icon_w = 70
-        self.icon_h = 55
-        self.icon = cv2.resize(self.icon, (self.icon_h, self.icon_w))
+        elif self.movingRight:
+            self.walkCount+=1
+            win.blit(self.walkRight[self.walkCount//3], (self.x,self.y))
+            self.walkCount += 1
+        else:
+            self.walkCount+=1
+            win.blit(self.walkLeft[self.walkCount//3], (self.x,self.y))
+            self.walkCount +=1
+        if self.movingLeft==True:
+            self.hitbox = (self.x,self.y, 44, 40)
+        else:
+            self.hitbox = (self.x+7,self.y, 44, 40)
+            
+        pygame.draw.rect(win, (255,0,0), self.hitbox,2)
+class log(object):
+    def __init__(self,x,y,vel):
+        self.x=x 
+        self.y=y 
+        self.width=50
+        self.height=70
+        self.vel=vel
+        self.hitbox = (self.x,self.y, self.width, self.height)
 
-class backwardsTruck(Point):
-    def __init__(self, name, x_max, x_min, y_max, y_min):
-        super(backwardsTruck, self).__init__(name, x_max, x_min, y_max, y_min)
-        img_name="/home/georgestamatelis/gym-slitherin/gym_slitherin/envs/backwardsTruck.png"
-        self.icon = cv2.imread(img_name)/ 255.0
-        self.icon_w = 70
-        self.icon_h = 55
-        self.icon = cv2.resize(self.icon, (self.icon_h, self.icon_w))
-class log(Point):
-    def __init__(self, name, x_max, x_min, y_max, y_min):
-        super(log, self).__init__(name, x_max, x_min, y_max, y_min)
-        img_name="/home/georgestamatelis/gym-slitherin/gym_slitherin/envs/largeLog.png"
-        self.icon = cv2.imread(img_name)/ 255.0
-        self.icon_w = 75
-        self.icon_h = 50
-        self.icon = cv2.resize(self.icon, (self.icon_h, self.icon_w))
+    def draw(self,win):
+        self.y+=self.vel
+        self.hitbox = (self.x,self.y, self.width, self.height)
+        pygame.draw.rect(win,(140,100,0),self.hitbox,0)
+        pygame.draw.rect(win,(255,0,0),self.hitbox,2)
+class Car(object):
+    def __init__(self,x,y,vel):
+        self.x=x 
+        self.y=y 
+        self.width=50
+        self.height=70
+        self.vel=vel
+        self.hitbox = (self.x,self.y, self.width, self.height)
 
+    def draw(self,win):
+        self.y+=self.vel
+        self.hitbox = (self.x,self.y, self.width, self.height)
+        pygame.draw.rect(win,(100,40,0),self.hitbox,0)
+        pygame.draw.rect(win,(255,0,0),self.hitbox,2)
+class Car(object):
+    def __init__(self,x,y,vel):
+        self.x = x
+        self.y = y
+        self.width = 50
+        self.height = 80
+        self.cleared=False
+        self.vel=vel
+        self.hitbox = (self.x, self.y,self.width,self.height)
+        self.HP=500
+    def draw(self,win):
+        self.y+=self.vel
 
+        self.hitbox = (self.x, self.y,self.width,self.height)
+        pygame.draw.rect(win, (240,0,255), self.hitbox)
+        pygame.draw.rect(win, (255,0,0), self.hitbox,2)
+
+STATE_H =75
+STATE_W =150
 class chickenGoEnv(Env):
     metadata = {
-        'render.modes': ['human', 'rgb_array'],
-        'video.frames_per_second': 10
+        'render.modes': ['human', 'rgb_array',"state_pixels"],
+        'video.frames_per_second': 1 # pygame takes care of frames
     }
     def __init__(self):
         super(chickenGoEnv, self).__init__()
-        
+        self.win=win = pygame.display.set_mode((1000,500))
+        self.viewer=None
+        pygame.display.set_caption("GO CHICKEN GO !!")
+        """
+        actions are
+        0 = do nothing 
+        1 = move left 
+        2 = move right 
+        3 = move up 
+        4 = move down 
+        5 = move left and up
+        6 = move left and down
+        7 = right and up
+        8 = right and down
+        """
+        self.action_space=spaces.Discrete(9)
+        self.observation_space = spaces.Box(
+            low=0, high=255, shape=(STATE_H,STATE_W, 3), dtype=np.uint8
+        )
 
-        
-        # Define a 2-D observation space
-        self.observation_shape = (500, 800)
-        self.observation_space = spaces.Box(low = np.zeros(self.observation_shape), 
-                                            high = np.full(self.observation_shape,255),
-                                            dtype = np.uint8)
-    
-        
-        # Define an action space ranging from 0 to 5
-        # 0 = do nothing
-        # 1 = move forwards
-        # 2 = move backwards
-        # 3 = jump
-        # 4 = up
-        # 5 = down
-        self.action_space = spaces.Discrete(6,)
-                        
-
-
-
-        # Create a canvas to render the environment images upon 
-
-        backroundPath="/home/georgestamatelis/gym-slitherin/gym_slitherin/envs/chickenRoad2.png"      
-        
-        if not os.path.isfile(backroundPath):
-            raise Exception("File doesn't exist")
-        self.background=cv2.imread(backroundPath)/255.0
-        self.canvas= cv2.resize(self.background, (800,500))  
-
-        # Permissible for agents to be
-        self.y_min = int (self.observation_shape[0] * 0.1)
-        self.x_min = 0
-        self.y_max = int (self.observation_shape[0] * 0.9)
-        self.x_max = self.observation_shape[1]
-        # Define elements present inside the environment
-        self.elements = []
-        
        
-    def draw_elements_on_canvas(self):
-        # Init the canvas 
-        self.canvas= cv2.resize(self.background, (800,500))  
-
-        # Draw the heliopter on canvas
-        for elem in self.elements:
-            elem_shape = elem.icon.shape
-            x,y = elem.x, elem.y
-            self.canvas[y : y + elem_shape[0], x:x + elem_shape[1]] = elem.icon
-        elem=self.chickens[0]
-        elem_shape = elem.icon.shape
-        x,y = elem.x, elem.y
-        self.canvas[y : y + elem_shape[0], x:x + elem_shape[1]] = elem.icon
+       
 
 
     def reset(self):
-
-        self.forwardCars=[]
-        self.backwardCars=[]
-        self.elements=[]
-        self.chickens=[]
+        self.cars=[]
         self.logs=[]
-        self.timeStep=0
-        self.facingBackwards=False
+        self.chickens=[]
+        self.chickens.append(Chicken(15,25))
+        self.c=self.chickens[0]
 
-        chicken=Chicken("chicken",self.x_max,self.x_min,self.y_max,self.y_min)
-        self.chickens.append(chicken)
-        self.elements.append(chicken)
-
-
-        self.draw_elements_on_canvas()
+        self.totalTimeSteps=0
+        observation=self.render(mode="state_pixels")
+        return observation
         
-
-    def render(self, mode = "human"):
-        assert mode in ["human", "rgb_array"], "Invalid mode, must be either \"human\" or \"rgb_array\""
-        if mode == "human":
-            cv2.imshow("Game", self.canvas)
-            cv2.waitKey(10)
+    def get_state(self):
+        state = np.fliplr(np.flip(np.rot90(pygame.surfarray.array3d(
+            pygame.display.get_surface()).astype(np.uint8))))
+        return state
+    def render(self, mode='human', close=False):
+        if mode == 'human':
+            if self.viewer is None:
+                self.viewer = rendering.SimpleImageViewer()
+            self.redraw(mode="human")
+        elif mode == 'rgb_array':
+            img =self.redraw(mode="rgb_array") #self.get_state()
+            return img
+        elif mode =="state_pixels":
+            img =self.redraw(mode="rgb_array") #self.get_state()
+            img = self.get_state()
+            img=cv2.resize(img,(STATE_H,STATE_W))
+            return img
+    def redraw(self,mode="human"):
+        #first draw the background
+        pygame.draw.rect(self.win,(20,200,0),(0,0,150,500))
+        pygame.draw.rect(self.win,(200,200,110),(150,0,20,500))
+        pygame.draw.rect(self.win,(127,127,127),(170,0,230,500))
+        pygame.draw.rect(self.win,(200,200,110),(380,0,20,500))
+        pygame.draw.rect(self.win,(0,70,150),(400,0,150,500))
+        pygame.draw.rect(self.win,(200,200,110),(550,0,20,500))
+        pygame.draw.rect(self.win,(127,127,127),(570,0,230,500))
+        pygame.draw.rect(self.win,(200,200,110),(790,0,20,500))
+        pygame.draw.rect(self.win,(20,200,0),(810,0,200,500))
+        for c in self.cars:
+            c.draw(self.win)
+        for c in self.logs:
+            c.draw(self.win)
+        for c in self.chickens:
+            c.draw(self.win)
+        if mode == "rgb_array":
+            img= pygame.surfarray.array3d(self.win)
+            return img
+        else:
+            pygame.display.update() 
     
-        elif mode == "rgb_array":
-            return self.canvas
-    
-    def close(self):
-        cv2.destroyAllWindows()
-    
-    def has_collided(self, elem1, elem2):
-        x_col = False
-        y_col = False
-
-        elem1_x, elem1_y = elem1.get_position()
-        elem2_x, elem2_y = elem2.get_position()
-
-        if 2 * abs(elem1_x - elem2_x) <= (elem1.icon_w + elem2.icon_w):
-            x_col = True
-
-        if 2 * abs(elem1_y - elem2_y) <= (elem1.icon_h + elem2.icon_h):
-            y_col = True
-
-        if x_col and y_col:
-            return True
     def step(self, action):
-        self.timeStep+=1
-        """
-        first manage action
-        """
-        # 0 = do nothing
-        # 1 = move forwards
-        c=self.chickens[0]
-        x,y=c.get_position()
-        if action==1:
-            c.set_position(x+4,y)
-            self.facingBackwards=False
-        # 2 = move backwards
-        if action == 2 :
-            c.set_position(x-4,y)
-            self.facingBackwards=True
-        # 3 = jump
-        if action ==3:
-            if self.facingBackwards==False:
-                c.set_position(x+15,y)
-            else:
-                c.set_position(x-15,y)
+        clock.tick(27)
 
-        # 4 = up
-        if action == 4 :
-            c.set_position(x,y-4)
-        # 5 = down
-        if action == 5 :
-            c.set_position(x,y+4)
+        self.totalTimeSteps+=1
         """
-        add forward cars
+        actions are
+        0 = do nothing 
+        1 = move left 
+        2 = move right 
+        3 = move up 
+        4 = move down 
+        5 = move left and up
+        6 = move left and down
+        7 = right and up
+        8 = right and down
         """
-        
-        if self.timeStep % 170==0 or self.timeStep==50 or self.timeStep == 120:
-            car=Truck("Car",self.x_max,self.x_min,self.y_max,self.y_min)
-            car.set_position(150,-10)
-            self.forwardCars.append(car)
-            self.elements.append(car)
-        if self.timeStep % 270 ==0 or self.timeStep in [20,90,150]:
-            car=Truck("Car",self.x_max,self.x_min,self.y_max,self.y_min)
-            car.set_position(200,-10)
-            self.forwardCars.append(car)
-            self.elements.append(car)
-        if self.timeStep % 327 == 0 or self.timeStep in  [30,100,150]:
-            car=Truck("Car",self.x_max,self.x_min,self.y_max,self.y_min)
-            car.set_position(270,-10)
-            self.forwardCars.append(car)
-            self.elements.append(car)
-        #backward cars 
-        if self.timeStep % 150 ==0  or self.timeStep in [30,90]:
-            car=backwardsTruck("Car",self.x_max,self.x_min,self.y_max,self.y_min)
-            car.set_position(480,440)
-            self.backwardCars.append(car)
-            self.elements.append(car)
-        if self.timeStep % 220 ==0 :
-            car=backwardsTruck("Car",self.x_max,self.x_min,self.y_max,self.y_min)
-            car.set_position(530,440)
-            self.backwardCars.append(car)
-            self.elements.append(car)
-        if self.timeStep % 270 ==0 :
-            car=backwardsTruck("Car",self.x_max,self.x_min,self.y_max,self.y_min)
-            car.set_position(590,440)
-            self.backwardCars.append(car)
-            self.elements.append(car)
-        
-        if self.timeStep % 140 ==0 :
-            l= log("log",self.x_max,self.x_min,self.y_max,self.y_min)
-            l.set_position(350,440)
-            self.elements.append(l)
-            self.logs.append(l)
-        if self.timeStep % 170 ==0 :
-            l= log("log",self.x_max,self.x_min,self.y_max+20,self.y_min-20)
-            #l.icon=cv2.rotate(l.icon,cv2.cv2.ROTATE_180)
-            l.set_position(400,-10)
-            self.elements.append(l)
-            self.logs.append(l)
+        """
+        DEAL WITH ACTIONS
+        """
+        if (action==1 or action ==5 or action==6) and self.c.x > 0:
+            self.c.x-=5
+            self.c.movingLeft=True
+            self.c.movingRight=False
+            self.c.standing=False
+        elif (action==2 or action==7 or action==8) and self.c.x <= 990:
+            self.c.x+=5
+            self.c.movingLeft=False
+            self.c.movingRight=True
+            self.c.standing=False
+        else:
+            self.c.movingLeft=False
+            self.c.movingRight=False
+            self.c.standing=True
+        if (action==3 or action==5 or action==7) and self.c.y >=10:
+            self.c.y-=5
+            self.c.movingRight=True
+            self.c.movingLeft=False
+            self.c.standing=False
 
-
+        if (action==4 or action==6 or action==8) and self.c.y <=490:
+            self.c.y+=5
+            self.c.movingRight=True
+            self.c.movingLeft=False
+            self.c.standing=False
         """
-        Animate car movements
+        GENERATE LOGS AND CARS
         """
+        if self.totalTimeSteps %80 ==0:
+            self.logs.append(log(420,520,-2))
+            self.logs.append(log(490,-20,2))
+        if self.totalTimeSteps %100==0 or self.totalTimeSteps ==50 :
+            self.cars.append(Car(190,-20,4))
+        if self.totalTimeSteps %70==0 or self.totalTimeSteps ==30  :
+            self.cars.append(Car(250,-20,4))
+        if self.totalTimeSteps %120==0 or self.totalTimeSteps == 40 :
+            self.cars.append(Car(315,-20,4))
+        if self.totalTimeSteps %90==0 and random.random()<=0.8:
+            self.cars.append(Car(570,520,-4))
+        if self.totalTimeSteps %110==0 and random.random()<=0.6:
+            self.cars.append(Car(570+60,520,-4))
+        if self.totalTimeSteps %80==0 and random.random()<=0.8:
+            self.cars.append(Car(570+120,520,-4))
+        """
+        COLISION AND "DROWNING" DETECTION
+        """
+        onLog=False
         reward=0
         done=False
-        for car in self.forwardCars:
-            x,y=car.get_position()
-            y=y+2
-            car.set_position(x,y)
-            if y>=390:
-                self.forwardCars.remove(car)
-                self.elements.remove(car)
-            if self.has_collided(c,car):
-                done=True
+        for l in self.logs:
+            rectA=pygame.Rect(l.hitbox)
+            rectB=pygame.Rect(self.c.hitbox)
+            #print(rectB)
+            #print(pygame.Rect.colliderect(rectA,rectB))
+            if pygame.Rect.colliderect(rectA,rectB)==True:
+                self.c.y+=l.vel*2#*3
+                print("fooook")
+                onLog=True
+                break
+            if l.y<=-80:
+                self.logs.remove(l)
+        if 390<=self.c.x<=506 and onLog==False:
+            print("DROWN")
+            reward=-1
+            done=True
+            state=self.render(mode="state_pixels")
+            return state,reward,done,{}
+        if self.c.y <=-30 or self.c.y >=530:
+            print("OUT OF BOUNDS")
+            reward=-1
+            done=True
+            state=self.render(mode="state_pixels")
+            return state,reward,done,{}
+        for car in self.cars:
+            rectA=pygame.Rect(car.hitbox)
+            rectB=pygame.Rect(self.c.hitbox)
+            #print(rectB)
+            #print(pygame.Rect.colliderect(rectA,rectB))
+            if pygame.Rect.colliderect(rectA,rectB)==True:
+                print("COLISSION GAME OVER")
                 reward=-1
-        
-        for car in self.backwardCars:
-            x,y=car.get_position()
-            y=y-2
-            car.set_position(x,y)
-            if y<=50:
-                self.backwardCars.remove(car)
-                self.elements.remove(car)
-            if self.has_collided(c,car):
                 done=True
-                reward=-1
-        if c.get_position()[0]>=700:
+                state=self.render(mode="state_pixels")
+                return state,reward,done,{}
+            if car.y >=540 or car.y <=-40:
+                self.cars.remove(car)
+        if self.c.x >=820:
+            print("VICTORY")
             reward=1
             done=True
-        #animate logs
-        for l in self.logs:
-            x,y = l.get_position()
-            if x==400:
-                y=y+1
-            else:
-                y=y-1
-            l.set_position(x,y)
-            #print("fookin y again",y)
-            if y>400 or  (y <=50 and x!=400):
-                self.logs.remove(l)
-                self.elements.remove(l)
-        if 330<=c.get_position()[0]<=440:
-            floating=False
-            for l in self.logs:
-                if self.has_collided(l,c):
-                    floating=True
-                    break
-            if floating==False:
-                print("Drawn")
-                done=True
-            else:
-                x,y=c.get_position()
-                if x<=385:
-                    y=y-1
-                else:
-                    y=y+1
-                c.set_position(x,y)
-
-        self.draw_elements_on_canvas()
-        #print("CHICKEN ->",c.get_position())
-        return self.canvas,reward,done,{}
+            state=self.render(mode="state_pixels")
+            return state,reward,done,{}
+        state=self.render(mode="state_pixels")
+        return state,reward,done,{}
 
 
 if __name__ == "__main__":
-    from pyglet.window import key
-
-    a = np.array([0,0]) 
-    #a[0] is about actions
-    # 0 = do nothing
-    # 1 = move forwards
-    # 2 = move backwards
-    # 3 = jump
-    # 4 = up
-    # 5 = down
-   
-    
-    def getActionFromKey(key):
-        if key==32: #jump
-            return 3
+    run=True
+    env=chickenGoEnv()
+    env.reset()
+    totalRew=0
+    while run:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                run = False
+        #action=env.action_space.sample()
+        action=0 #do nothing
+        keys = pygame.key.get_pressed()
+        """
+        actions are
+        0 = do nothing 
+        1 = move left 
+        2 = move right 
+        3 = move up 
+        4 = move down 
+        5 = move left and up
+        6 = move left and down
+        7 = right and up
+        8 = right and down
+        """
+        left=False
+        right=False
+        up=False
+        down=False
+        if keys[pygame.K_LEFT] :
+            left=True
+        elif keys[pygame.K_RIGHT]:
+            right=True
+        if keys[pygame.K_UP]:
+            up=True
+        elif keys[pygame.K_DOWN]:
+            down=True 
+        if left==True:
+            if up==True:
+                action=5
+            elif down==True:
+                action=6
+            else:
+                action=1
+        elif right==True:
+            if up==True:
+                action=7
+            elif down==True:
+                action=8
+            else:
+                action=2
+        if up==True and (left==False and right==False):
+            action=3
+        if down==True and (left==False and right==False and up==False):
+            action=4
+        obs, reward, done, info=env.step(action)
+        env.render(mode='human')
+        totalRew+=reward
+        print("total reward=",totalRew)
+        if done==True:
+            break
         
-        if key==82: #up 
-            return 4
-        if key==84: #down
-            return 5
-        if key==81: #left
-            return 2
-        if key==83: #right
-            return 1
-
-        return 0
-    env = chickenGoEnv()
-    img=env.render(mode="rgb_array")
-    """
-    env.viewer.window.on_key_press = key_press
-    env.viewer.window.on_key_release = key_release
-    record_video = False
-    if record_video:
-        from gym.wrappers.monitor import Monitor
-
-        env = Monitor(env, "/tmp/video-test", force=True)
-    """
-    isopen = True
-    while isopen:
-        env.reset()
-        total_reward = 0.0
-        steps = 0
-        restart = False
-        while True:
-            cv2.imshow("Game",img)
-            key=cv2.waitKey(10)
-            
-            action=getActionFromKey(key)
-            s, r, done, info = env.step(action)
-            total_reward += r
-            if steps % 200 == 0 or done:
-                print("action= ",action)
-                print("step {} total_reward {:+0.2f}".format(steps, total_reward))
-            steps += 1
-            img=env.render("rgb_array")
-            #isopen = env.render()
-            if done:
-                break
-            #if done or restart or isopen == False:
-            #    break
-    env.close()

@@ -2,7 +2,7 @@ from gym_slitherin.envs.hill_climber_env import VIEWPORT_H, VIEWPORT_W
 import sys
 import math
 import numpy as np
-
+import cv2
 import Box2D
 from Box2D.b2 import fixtureDef
 from Box2D.b2 import polygonShape
@@ -20,12 +20,14 @@ import pyglet
 pyglet.options["debug_gl"] = False
 from pyglet import gl
 #from topDownCar import *
+from gym_slitherin.envs.topDownCar import *
 
 VIEWPORT_W = 1000
 VIEWPORT_H = 800
-
+STATE_H = 100
+STATE_W = 100
 SCALE = 6.0  
-FPS = 60  # Frames per second
+FPS = 62  # Frames per second
 
 
 
@@ -64,7 +66,7 @@ class CarParking3(gym.Env, EzPickle):
         
 
         self.observation_space = spaces.Box(
-            low=0, high=255, shape=(VIEWPORT_H, VIEWPORT_W, 3), dtype=np.uint8
+            low=0, high=255, shape=(STATE_H, STATE_W, 3), dtype=np.uint8
         )
                 # The walls
         self.obs=[]
@@ -90,6 +92,7 @@ class CarParking3(gym.Env, EzPickle):
         self.keysPressed=[]
 
     def reset(self):
+        self.totalTimeSteps=0
         self._destroy()
         self.tires=[]
         self.cars=[]
@@ -230,6 +233,7 @@ class CarParking3(gym.Env, EzPickle):
             8 = backward right
         """    
         keys=[]
+        self.totalTimeSteps+=1
         if action == 1 :
             keys.append("left")
         if action == 2 :
@@ -267,7 +271,11 @@ class CarParking3(gym.Env, EzPickle):
             done=True
             reward=1
             print("VICTORY")
-        
+        if self.totalTimeSteps >=2500 and done==False:
+            reward=-1
+            done=True
+            print("time out")
+        #print("ts=",self.totalTimeSteps)
         return self.state,reward,done,{}
 
 
@@ -350,6 +358,7 @@ class CarParking3(gym.Env, EzPickle):
 
         if mode=="rgb_array":       
             arr= self.viewer.get_array()#viewer.render(return_rgb_array=True)
+            arr=cv2.resize(arr,(STATE_H,STATE_W))
             return arr 
         if mode=="human":
             return self.viewer.render()

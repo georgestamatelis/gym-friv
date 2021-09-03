@@ -105,6 +105,7 @@ class zombieOnslaughtEasyEnv(gym.Env):
                 bullet.x +=bullet.vel
             else:
                 self.bullets.pop(self.bullets.index(bullet)) 
+                continue
             for z in self.weakZombies:
                 rectA=pygame.Rect(z.hitbox)
                 rectB=pygame.Rect(bullet.hitbox)
@@ -114,7 +115,7 @@ class zombieOnslaughtEasyEnv(gym.Env):
                         self.weakZombies.remove(z)
                         self.zombiesKilled+=1
                         reward+=1.0/self.zombiesToKill
-                    self.bullets.remove(bullet)
+                    self.bullets.pop(self.bullets.index(bullet))
         if self.zombiesKilled==self.zombiesToKill:
             print("VICTORY")
             done=True

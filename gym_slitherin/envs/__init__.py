@@ -1,6 +1,8 @@
 
 from gym_slitherin.envs.goChickenGo import chickenGoEnv
 from gym_slitherin.envs.zombieOnslaught import zombieOnslaughtEasyEnv
+from gym_slitherin.envs.zombieOnslaught2 import zombieOnslaughtHardEnv
+
 from gym_slitherin.envs.hill_climber_env import Hill_Climber_Env
 
 from gym_slitherin.envs.carParking import CarParking
@@ -14,3 +16,5 @@ from gym_slitherin.envs.platformerEnv3 import agentPlatformerEnv3
 from gym_slitherin.envs.onionBoyEnv import onionBoyEnv
 
 
+from gym_slitherin.envs.eyeCopterEnv1 import eyeCopterEnv1
+from gym_slitherin.envs.iLoveTrafficEasy import iLoveTrafficEnv1
