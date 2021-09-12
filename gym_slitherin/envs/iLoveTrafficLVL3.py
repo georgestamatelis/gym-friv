@@ -45,7 +45,7 @@ class Car(object):
         self.hitbox = (self.x, self.y,self.width,self.height)
         pygame.draw.rect(win, self.color, self.hitbox)
         #pygame.draw.rect(win, (255,0,0), self.hitbox,2)
-class iLoveTrafficEnv4(gym.Env):
+class iLoveTrafficEnv3(gym.Env):
     metadata = {
         "render.modes": ["human", "rgb_array", "state_pixels"],
         "video.frames_per_second": FPS,
@@ -59,12 +59,9 @@ class iLoveTrafficEnv4(gym.Env):
         """
         actions are 
         0 do nothing
-        1 change the top left traffic light
-        2 change the top right traffic light
-        3 change the bottom left traffic light
-        4 change the bottom right traffic light
+        1 change the traffic light 
         """
-        self.action_space=spaces.Discrete(5)
+        self.action_space=spaces.Discrete(2)
         self.observation_space = spaces.Box(
             low=0, high=255, shape=(STATE_H,STATE_W, 3), dtype=np.uint8
         )
@@ -73,18 +70,13 @@ class iLoveTrafficEnv4(gym.Env):
         """
         """
         #empty lists of cars 
-        self.downCars=[]
+        self.verticalCars=[]
         self.leftCars=[]
         self.rightCars=[]
-        self.upCars=[]
-        self.upCars.append(Car(280,500,25,40,(240,0,255)))
-        self.downCars.append(Car(230,10,25,40,(240,0,255)))
+        self.verticalCars.append(Car(285,10,25,40,(240,0,255)))
         self.leftCars.append(Car(465,255,40,25,(240,0,255)))
         self.rightCars.append(Car(5,285+25,40,25,(240,0,255)))
-        self.isRedTopLeft=True
-        self.isRedTopRight=True
-        self.isRedBottomLeft=True
-        self.isRedBottomRight=True
+        self.isRed=True
 
         #numSteps is used to determine wether a car will be generated
         self.numSteps=0
@@ -94,21 +86,11 @@ class iLoveTrafficEnv4(gym.Env):
         return observation
     def step(self,action):
         """
-        actions are 
-        0 do nothing
-        1 change the top left traffic light
-        2 change the top right traffic light
-        3 change the bottom left traffic light
-        4 change the bottom right traffic light
+        
         """
+        #if action==0 do nothing if action==1 change light
         if action == 1:
-            self.isRedTopLeft= not self.isRedTopLeft
-        elif action==2:
-            self.isRedTopRight = not self.isRedTopRight
-        elif action==3:
-            self.isRedBottomLeft = not self.isRedBottomLeft
-        elif action==4:
-            self.isRedBottomRight= not self.isRedBottomRight
+            self.isRed= not self.isRed
         numWaiting=0
         self.numSteps+=1
         reward=0
@@ -117,15 +99,13 @@ class iLoveTrafficEnv4(gym.Env):
         if self.numSteps %90==0:
             self.leftCars.append(Car(465,255,40,25,(240,0,255)))
             self.rightCars.append(Car(5,285+25,40,25,(240,0,255)))
-            self.downCars.append(Car(230,10,25,40,(240,0,255)))
-            self.upCars.append(Car(280,500,25,40,(240,0,255)))
-        
-        #animate existing downCars
-        for c in self.downCars:
-            if c.y<=205 or  self.isRedTopLeft==False or c.y >=220:
+            self.verticalCars.append(Car(285,10,25,40,(240,0,255)))
+        #animate existing verticalCars
+        for c in self.verticalCars:
+            if c.y<=100 or  self.isRed==False or c.y >=110:
                 #make sure the animations wait in line and not one no top of the other
                 willCollide=False
-                for c2 in self.downCars:
+                for c2 in self.verticalCars:
                     if c2.y == c.y+45:
                         willCollide=True
                         numWaiting+=1
@@ -135,60 +115,20 @@ class iLoveTrafficEnv4(gym.Env):
             if c.y >=270 and c.cleared==False:
                 c.cleared=True
                 self.numCleared+=1
-                reward+=1/20
+                reward+=0.1
             if c.y >=500:
-                self.downCars.remove(c)
-        #animate existing upCars
-        for c in self.upCars:
-            if c.y>=350 or  self.isRedBottomRight==False or c.y <=330:
-                #make sure the animations wait in line and not one no top of the other
-                willCollide=False
-                for c2 in self.upCars:
-                    if c2.y == c.y-45:
-                        willCollide=True
-                        numWaiting+=1
-                if not willCollide:
-                    c.y-=5
-            #cleared a car
-            if c.y <=270 and c.cleared==False:
-                c.cleared=True
-                self.numCleared+=1
-                reward+=1/20
-            if c.y <=0:
-                self.upCars.remove(c)
+                self.verticalCars.remove(c)
         #animate horizontal cars
         for c in self.leftCars:
-            if c.x<=325 or c.x >=350 or self.isRedTopRight==False:
-                willCollide=False
-                for c2 in self.leftCars:
-                    if c2.x == c.x-45:
-                        willCollide=True
-                        numWaiting+=1   
-                if willCollide==False:
-                    c.x-=5    
-            if c.x <=300 and c.cleared==False:
-                self.numCleared+=1
-                c.cleared=True
-                reward+=1/20
+            c.x-=5    
             if c.x <=0:
                 self.leftCars.remove(c)
         for c in self.rightCars:
-            if c.x<=170 or c.x >=195 or self.isRedBottomLeft==False:
-                willCollide=False
-                for c2 in self.rightCars:
-                    if c2.x == c.x+45:
-                        willCollide=True
-                        numWaiting+=1
-                if willCollide==False:
-                    c.x+=5 
-            if c.x >=210 and c.cleared==False:
-                self.numCleared+=1   
-                c.cleared=True
-                reward+=1/20
+            c.x+=5    
             if c.x <=0:
                 self.rightCars.remove(c)
         #now time to check collisions
-        for c1 in self.downCars:
+        for c1 in self.verticalCars:
             rectA=pygame.Rect(c1.hitbox)
             for c2 in self.leftCars:
                 rectB=pygame.Rect(c2.hitbox)
@@ -202,26 +142,12 @@ class iLoveTrafficEnv4(gym.Env):
                     print("GAME OVER")
                     done=True
                     reward=-1
-        for c1 in self.upCars:
-            rectA=pygame.Rect(c1.hitbox)
-            for c2 in self.leftCars:
-                rectB=pygame.Rect(c2.hitbox)
-                if pygame.Rect.colliderect(rectA,rectB)==True:
-                    print("GAME OVER")
-                    done=True
-                    reward=-1
-            for c2 in self.rightCars:
-                rectB=pygame.Rect(c2.hitbox)
-                if pygame.Rect.colliderect(rectA,rectB)==True:
-                    print("GAME OVER")
-                    done=True
-                    reward=-1
-        if numWaiting >=8:
+        if numWaiting >=2:
             print("TO MUCH TRAFFIC")
             done=True
             reward=-1
         #check end/victory condition
-        if self.numCleared >=20:
+        if self.numCleared >=10:
             print("VICTORY")
             done=True
         state=self.render(mode="state_pixels")
@@ -246,54 +172,32 @@ class iLoveTrafficEnv4(gym.Env):
     def redraw(self,mode="human"):
         self.win.blit(bg, (0,0))
         #draw black lines surounding the roads
-        pygame.draw.rect(self.win,(1,1,1),(220,0,10,500))
+        pygame.draw.rect(self.win,(1,1,1),(265,0,10,500))
         pygame.draw.rect(self.win,(1,1,1),(275+45,0,10,500))
         pygame.draw.rect(self.win,(1,1,1),(0,240,500,10))
         pygame.draw.rect(self.win,(1,1,1),(0,285+20+35,500,10))
 
         #draw the roads
-        road1=(230,0,90,500)
+        road1=(275,0,45,500)
         pygame.draw.rect(self.win, (127,127,127), road1)
         road2=(0,250,500,45)
         pygame.draw.rect(self.win, (127,127,127), road2)
         lane=(0,285,500,20)
         pygame.draw.rect(self.win, (255,255,255), lane)
-        
         road3=(0,285+20,500,35)
         pygame.draw.rect(self.win, (127,127,127), road3)
-        lane2=(260,0,20,500)
-        pygame.draw.rect(self.win, (255,255,255), lane2)
-        #top left traffic light
-        pygame.draw.rect(self.win,(1,1,1),(170,195,40,40))
-        if self.isRedTopLeft:
-            pygame.draw.circle(self.win,(255,0,0),(190,215),12.5)
+
+        #draw traffic light
+        pygame.draw.rect(self.win,(1,1,1),(210,105,40,40))
+        if self.isRed:
+            pygame.draw.circle(self.win,(255,0,0),(230,125),12.5)
         else:
-            pygame.draw.circle(self.win,(0,255,0),(190,215),12.5)
-        #top right traffic light
-        pygame.draw.rect(self.win,(1,1,1),(340,195,40,40))
-        if self.isRedTopRight:
-            pygame.draw.circle(self.win,(255,0,0),(360,215),12.5)
-        else:
-            pygame.draw.circle(self.win,(0,255,0),(360,215),12.5)
-        #bottom left traffic light
-        pygame.draw.rect(self.win,(1,1,1),(170,360,40,40))
-        if self.isRedBottomLeft:
-            pygame.draw.circle(self.win,(255,0,0),(190,380),12.5)
-        else:
-            pygame.draw.circle(self.win,(0,255,0),(190,380),12.5)
-        #bottom right traffic light
-        pygame.draw.rect(self.win,(1,1,1),(340,360,40,40))
-        if self.isRedBottomRight:
-            pygame.draw.circle(self.win,(255,0,0),(360,380),12.5)
-        else:
-            pygame.draw.circle(self.win,(0,255,0),(360,380),12.5)
-        for c in self.downCars:
+            pygame.draw.circle(self.win,(0,255,0),(230,125),12.5)
+        for c in self.verticalCars:
             c.draw(self.win)
         for c in self.leftCars:
             c.draw(self.win)
         for c in self.rightCars:
-            c.draw(self.win)
-        for c in self.upCars:
             c.draw(self.win)
         if mode == "rgb_array":
             img= pygame.surfarray.array3d(self.win)
@@ -302,7 +206,7 @@ class iLoveTrafficEnv4(gym.Env):
             pygame.display.update() 
 if __name__ == "__main__":
     run=True
-    env=iLoveTrafficEnv4()
+    env=iLoveTrafficEnv3()
     env.reset()
     totalRew=0
     mouseDelay=0
@@ -320,17 +224,8 @@ if __name__ == "__main__":
         #user action
         if pygame.mouse.get_pressed()[0]==1 and mouseDelay==0:
             mx,my=pygame.mouse.get_pos()
-            if 170<=mx<=210 and 190 <=my<=230:
+            if 210<=mx<=250 and 100 <=my<=130:
                 action=1
-                mouseDelay=1
-            elif 340 <=mx <=380 and 190 <=my <=230:
-                action=2
-                mouseDelay=1
-            elif 170<=mx<=210 and 360<=my<=400:
-                action=3
-                mouseDelay=1
-            elif 340<=mx <= 380 and 360 <=my<=390:
-                action=4
                 mouseDelay=1
         obs, reward, done, info=env.step(action)
         env.render(mode='human')

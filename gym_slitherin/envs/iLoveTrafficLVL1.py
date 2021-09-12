@@ -45,7 +45,7 @@ class Car(object):
         self.hitbox = (self.x, self.y,self.width,self.height)
         pygame.draw.rect(win, self.color, self.hitbox)
         #pygame.draw.rect(win, (255,0,0), self.hitbox,2)
-class iLoveTrafficEnv1(gym.Env):
+class iLoveTrafficEnvLVL1(gym.Env):
     metadata = {
         "render.modes": ["human", "rgb_array", "state_pixels"],
         "video.frames_per_second": FPS,
@@ -72,10 +72,8 @@ class iLoveTrafficEnv1(gym.Env):
         #empty lists of cars 
         self.verticalCars=[]
         self.leftCars=[]
-        self.rightCars=[]
         self.verticalCars.append(Car(285,10,25,40,(240,0,255)))
         self.leftCars.append(Car(465,255,40,25,(240,0,255)))
-        self.rightCars.append(Car(5,285+25,40,25,(240,0,255)))
         self.isRed=True
 
         #numSteps is used to determine wether a car will be generated
@@ -98,7 +96,6 @@ class iLoveTrafficEnv1(gym.Env):
         #first generate cars
         if self.numSteps %90==0:
             self.leftCars.append(Car(465,255,40,25,(240,0,255)))
-            self.rightCars.append(Car(5,285+25,40,25,(240,0,255)))
             self.verticalCars.append(Car(285,10,25,40,(240,0,255)))
         #animate existing verticalCars
         for c in self.verticalCars:
@@ -123,10 +120,7 @@ class iLoveTrafficEnv1(gym.Env):
             c.x-=5    
             if c.x <=0:
                 self.leftCars.remove(c)
-        for c in self.rightCars:
-            c.x+=5    
-            if c.x <=0:
-                self.rightCars.remove(c)
+        
         #now time to check collisions
         for c1 in self.verticalCars:
             rectA=pygame.Rect(c1.hitbox)
@@ -136,13 +130,8 @@ class iLoveTrafficEnv1(gym.Env):
                     print("GAME OVER")
                     done=True
                     reward=-1
-            for c2 in self.rightCars:
-                rectB=pygame.Rect(c2.hitbox)
-                if pygame.Rect.colliderect(rectA,rectB)==True:
-                    print("GAME OVER")
-                    done=True
-                    reward=-1
-        if numWaiting >=4:
+            
+        if numWaiting >=3:
             print("TO MUCH TRAFFIC")
             done=True
             reward=-1
@@ -175,17 +164,13 @@ class iLoveTrafficEnv1(gym.Env):
         pygame.draw.rect(self.win,(1,1,1),(265,0,10,500))
         pygame.draw.rect(self.win,(1,1,1),(275+45,0,10,500))
         pygame.draw.rect(self.win,(1,1,1),(0,240,500,10))
-        pygame.draw.rect(self.win,(1,1,1),(0,285+20+35,500,10))
+        pygame.draw.rect(self.win,(1,1,1),(0,285+10,500,10))
 
         #draw the roads
         road1=(275,0,45,500)
         pygame.draw.rect(self.win, (127,127,127), road1)
         road2=(0,250,500,45)
         pygame.draw.rect(self.win, (127,127,127), road2)
-        lane=(0,285,500,20)
-        pygame.draw.rect(self.win, (255,255,255), lane)
-        road3=(0,285+20,500,35)
-        pygame.draw.rect(self.win, (127,127,127), road3)
 
         #draw traffic light
         pygame.draw.rect(self.win,(1,1,1),(210,195,40,40))
@@ -197,8 +182,7 @@ class iLoveTrafficEnv1(gym.Env):
             c.draw(self.win)
         for c in self.leftCars:
             c.draw(self.win)
-        for c in self.rightCars:
-            c.draw(self.win)
+        
         if mode == "rgb_array":
             img= pygame.surfarray.array3d(self.win)
             return img
@@ -206,7 +190,7 @@ class iLoveTrafficEnv1(gym.Env):
             pygame.display.update() 
 if __name__ == "__main__":
     run=True
-    env=iLoveTrafficEnv1()
+    env=iLoveTrafficEnvLVL1()
     env.reset()
     totalRew=0
     mouseDelay=0

@@ -10,9 +10,9 @@ from stable_baselines3.common.noise import NormalActionNoise
 import numpy as np
 
 #env = gym.make("gym_slitherin:onionBoyEnv-v0") 
-env = gym.make("gym_slitherin:zombieOnslaught-v1") 
+env = gym.make("gym_slitherin:spinSoccer-v2") 
 
-model=PPO.load("PPO-ZOMBIE-HARD")
+model=PPO.load("PPO-SOCCER-2")
 
 obs = env.reset()
 for i in range(100000):

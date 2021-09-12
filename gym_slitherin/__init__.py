@@ -16,3 +16,8 @@ register(id='onionBoyEnv-v0',entry_point='gym_slitherin.envs:onionBoyEnv',)
 register(id='eyeCopter-v0',entry_point='gym_slitherin.envs:eyeCopterEnv1',)
 
 register(id='traffic-v0',entry_point='gym_slitherin.envs:iLoveTrafficEnv1',)
+
+register(id='spinSoccer-v0',entry_point='gym_slitherin.envs:spinSoccerEnv',)
+register(id='spinSoccer-v1',entry_point='gym_slitherin.envs:spinSoccerEnv1',)
+register(id='spinSoccer-v2',entry_point='gym_slitherin.envs:spinSoccerEnv2',)
+register(id='spinSoccer-v3',entry_point='gym_slitherin.envs:spinSoccerEnv3',)

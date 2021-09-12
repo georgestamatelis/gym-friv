@@ -52,7 +52,7 @@ class Chicken(object):
         else:
             self.hitbox = (self.x+7,self.y, 44, 40)
             
-        pygame.draw.rect(win, (255,0,0), self.hitbox,2)
+        #pygame.draw.rect(win, (255,0,0), self.hitbox,2)
 class log(object):
     def __init__(self,x,y,vel):
         self.x=x 
@@ -66,37 +66,22 @@ class log(object):
         self.y+=self.vel
         self.hitbox = (self.x,self.y, self.width, self.height)
         pygame.draw.rect(win,(140,100,0),self.hitbox,0)
-        pygame.draw.rect(win,(255,0,0),self.hitbox,2)
-class Car(object):
-    def __init__(self,x,y,vel):
-        self.x=x 
-        self.y=y 
-        self.width=50
-        self.height=70
-        self.vel=vel
-        self.hitbox = (self.x,self.y, self.width, self.height)
+        #pygame.draw.rect(win,(255,0,0),self.hitbox,2)
 
-    def draw(self,win):
-        self.y+=self.vel
-        self.hitbox = (self.x,self.y, self.width, self.height)
-        pygame.draw.rect(win,(100,40,0),self.hitbox,0)
-        pygame.draw.rect(win,(255,0,0),self.hitbox,2)
 class Car(object):
     def __init__(self,x,y,vel):
         self.x = x
         self.y = y
         self.width = 50
         self.height = 80
-        self.cleared=False
         self.vel=vel
         self.hitbox = (self.x, self.y,self.width,self.height)
-        self.HP=500
     def draw(self,win):
         self.y+=self.vel
 
         self.hitbox = (self.x, self.y,self.width,self.height)
         pygame.draw.rect(win, (240,0,255), self.hitbox)
-        pygame.draw.rect(win, (255,0,0), self.hitbox,2)
+        #pygame.draw.rect(win, (255,0,0), self.hitbox,2)
 
 STATE_H =75
 STATE_W =150
@@ -107,7 +92,7 @@ class chickenGoEnv(Env):
     }
     def __init__(self):
         super(chickenGoEnv, self).__init__()
-        self.win=win = pygame.display.set_mode((1000,500))
+        self.win= pygame.display.set_mode((1000,500))
         self.viewer=None
         pygame.display.set_caption("GO CHICKEN GO !!")
         """
@@ -137,6 +122,8 @@ class chickenGoEnv(Env):
         self.chickens=[]
         self.chickens.append(Chicken(15,25))
         self.c=self.chickens[0]
+        self.hasReachedLogs=False
+        self.hasReachedSecondRoad=False
 
         self.totalTimeSteps=0
         observation=self.render(mode="state_pixels")
@@ -157,7 +144,7 @@ class chickenGoEnv(Env):
         elif mode =="state_pixels":
             img =self.redraw(mode="rgb_array") #self.get_state()
             img = self.get_state()
-            img=cv2.resize(img,(STATE_H,STATE_W))
+            img=cv2.resize(img,(STATE_W,STATE_H))
             return img
     def redraw(self,mode="human"):
         #first draw the background
@@ -257,8 +244,10 @@ class chickenGoEnv(Env):
             #print(pygame.Rect.colliderect(rectA,rectB))
             if pygame.Rect.colliderect(rectA,rectB)==True:
                 self.c.y+=l.vel*2#*3
-                print("fooook")
                 onLog=True
+                if self.hasReachedLogs==False:
+                    reward+=0.3
+                    self.hasReachedLogs=True
                 break
             if l.y<=-80:
                 self.logs.remove(l)
@@ -289,10 +278,13 @@ class chickenGoEnv(Env):
                 self.cars.remove(car)
         if self.c.x >=820:
             print("VICTORY")
-            reward=1
+            reward+=0.5
             done=True
             state=self.render(mode="state_pixels")
             return state,reward,done,{}
+        if self.hasReachedSecondRoad==False and self.c.x >=510:
+            reward+=0.2
+            self.hasReachedSecondRoad=True
         state=self.render(mode="state_pixels")
         return state,reward,done,{}
 
