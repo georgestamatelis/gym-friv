@@ -16,7 +16,7 @@ import random
 font = cv2.FONT_HERSHEY_COMPLEX_SMALL 
 clock = pygame.time.Clock()
 #the assets are here
-assetsPath="/home/georgestamatelis/gym-friv/chickenGo/"
+assetsPath="./chickenGo/"
 """
 On both games 
 reward = 0.3 for reaching the logs, 

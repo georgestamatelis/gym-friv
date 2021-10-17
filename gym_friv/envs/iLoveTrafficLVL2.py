@@ -21,7 +21,7 @@ STATE_W = 96  # less than Atari 160x192
 STATE_H = 96
 
 FPS = 1  # Frames are taken care of by pygame
-assetsPath="/home/georgestamatelis/gym-friv/iLoveTraffic/"
+assetsPath="./iLoveTraffic/"
 
 bg = pygame.image.load(assetsPath+'background.png')
 bg = pygame.transform.scale(bg,(WINDOW_H,WINDOW_W))

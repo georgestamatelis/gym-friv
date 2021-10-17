@@ -32,7 +32,7 @@ font = cv2.FONT_HERSHEY_COMPLEX_SMALL
 clock = pygame.time.Clock()
 
 #this is where the sprites for the characters are located
-assetsPath="/home/georgestamatelis/gym-friv/chickenGo/"
+assetsPath="./chickenGo/"
 
 class Chicken(object):
     walkRight = [pygame.image.load(assetsPath+'R1.png'), pygame.image.load(assetsPath+'R2.png'), pygame.image.load(assetsPath+'R3.png'), pygame.image.load(assetsPath+'R4.png'), pygame.image.load(assetsPath+'R5.png'), pygame.image.load(assetsPath+'R6.png'), pygame.image.load(assetsPath+'R7.png')]

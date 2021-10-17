@@ -15,7 +15,7 @@ from gym.envs.classic_control import rendering
 import math
 from gym.utils import seeding, EzPickle
 #in here there are the classes used by the environment
-from onionClasses import *
+from gym_friv.envs.onionClasses import *
 
 FPS=27
 

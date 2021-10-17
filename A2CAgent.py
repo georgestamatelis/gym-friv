@@ -10,8 +10,8 @@ from stable_baselines3.common.noise import NormalActionNoise
 import numpy as np
 
 #env = gym.make("gym_slitherin:onionBoyEnv-v0") 
-env = gym.make("gym_slitherin:agentPlatformer-v2") 
-#env = gym.make("gym_slitherin:chickenGoEnv-v0")
+#env = gym.make("gym_slitherin:-v2") 
+env = gym.make("gym_slitherin:chickenGoEnv-v0")
 
 print("FIRST WILL CHECK IF ENV IS OK")
 check_env(env)
@@ -21,24 +21,19 @@ check_env(env)
 print("NOW WILL TRAIN THE MODEL")
 print(env.action_space)
 
-model = PPO(
-    'CnnPolicy',env,verbose=1,
-    create_eval_env=True,clip_range=0.1,
-    seed=185
-   
-    )
 
-#model = A2C(
-#    'CnnPolicy', env, verbose=1,seed=185,
-#    create_eval_env=True) 
 
-#378880
+model = A2C(
+    'CnnPolicy', env, verbose=1,seed=185,
+   create_eval_env=True) 
+
+
 model.learn(
     total_timesteps= 2000000,eval_env=env,
     eval_freq=50000,n_eval_episodes=5
     ) 
 print("learning done") 
-model.save("PPO-PLATFORMER2")
+model.save("A2C-CHICKEN-SLOW")
 #print("model Saved")
 obs = env.reset()
 for i in range(100000):
