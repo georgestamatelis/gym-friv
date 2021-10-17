@@ -1,0 +1,7 @@
+README.md
+setup.py
+gym_friv.egg-info/PKG-INFO
+gym_friv.egg-info/SOURCES.txt
+gym_friv.egg-info/dependency_links.txt
+gym_friv.egg-info/requires.txt
+gym_friv.egg-info/top_level.txt
