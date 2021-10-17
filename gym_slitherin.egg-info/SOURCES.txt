@@ -1,7 +1,0 @@
-README.md
-setup.py
-gym_slitherin.egg-info/PKG-INFO
-gym_slitherin.egg-info/SOURCES.txt
-gym_slitherin.egg-info/dependency_links.txt
-gym_slitherin.egg-info/requires.txt
-gym_slitherin.egg-info/top_level.txt
