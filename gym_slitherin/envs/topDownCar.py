@@ -1,4 +1,3 @@
-from gym_slitherin.envs.hill_climber_env import VIEWPORT_H, VIEWPORT_W
 import sys
 import math
 import numpy as np

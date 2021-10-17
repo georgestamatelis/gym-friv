@@ -72,7 +72,7 @@ class player(object):
             else:
                 win.blit(walkLeft[0], (self.x, self.y))
         self.hitbox = (self.x + 17, self.y + 11, 29, 52)
-        pygame.draw.rect(win, (255,0,0), self.hitbox,2)
+        #pygame.draw.rect(win, (255,0,0), self.hitbox,2)
                
 class Block(object):
     def __init__(self,x,y,width,height,color=(0,0,0)):
@@ -86,7 +86,7 @@ class Block(object):
     def draw(self,win):
         self.hitbox = (self.x, self.y,self.width,self.height)
         pygame.draw.rect(win, self.color, self.hitbox,0)
-        pygame.draw.rect(win, (255,0,0), self.hitbox,2)
+        #pygame.draw.rect(win, (255,0,0), self.hitbox,2)
 
     def manOnBlock(self,man):
         rectA=pygame.Rect(self.hitbox)
@@ -161,7 +161,7 @@ class Coin:
         self.hitbox=(self.x-self.radius,self.y-self.radius,2*self.radius,2*self.radius)
     def draw(self,win):
         pygame.draw.circle(win,self.color,(self.x,self.y),self.radius)
-        pygame.draw.rect(win, (255,0,0), self.hitbox,2)
+        #pygame.draw.rect(win, (255,0,0), self.hitbox,2)
 
 
 """
@@ -207,10 +207,11 @@ class agentPlatformerEnv2(gym.Env, EzPickle):
     def reset(self):
         """
         """
+        self.totalTimeSteps=0
         self._destroy()
         #mainloop
         self.font = pygame.font.SysFont('comicsans', 30, True)
-        self.man = player(50, 20, 64,64)
+        self.man = player(60, 20, 64,64)
         self.blocks=[]
         self.spikes=[]
         self.vacums=[]  
@@ -253,6 +254,7 @@ class agentPlatformerEnv2(gym.Env, EzPickle):
         observation=self.render(mode="state_pixels")#self.get_state()
         #state = np.fliplr(np.flip(np.rot90(pygame.surfarray.array3d(
         #     pygame.display.get_surface()).astype(np.uint8))))
+        self.render(mode='human')
         return observation
     def step(self, action):
         """
@@ -267,10 +269,10 @@ class agentPlatformerEnv2(gym.Env, EzPickle):
         7 fly left
         8 fly right
         """
-
+        self.totalTimeSteps+=1
         done=False
         reward=0
-        if (action==1 or action==5 or action==7) and self.man.x>=30:
+        if (action==1 or action==5 or action==7) and self.man.x>=60:
             self.man.x -= self.man.vel
             self.man.left = True
             self.man.right = False
@@ -348,11 +350,7 @@ class agentPlatformerEnv2(gym.Env, EzPickle):
                     #print("WHY DOESN'T IT WORK?")
                     self.man.x+=self.man.vel*2
         ymin=630
-        #if 630<=self.man.x<=720:
-        #    ymin=650         
-
         
-            #print("self.ymin=",self.ymin)
         if self.man.y <=ymin and self.man.isJump==False and self.onBlock==False:
             self.man.y += 15
         if self.goalBlock.manCollides(self.man):
@@ -375,9 +373,13 @@ class agentPlatformerEnv2(gym.Env, EzPickle):
                 if b.manOnBlock(self.man):
                     self.man.x=self.man.x+2*self.vel
             #print("b.x=",b.x,"vel=",vel)
-   
+        if self.totalTimeSteps>=2000:
+            done=True
+            reward=-1
+            print("TIME OUT")
 
         state=self.render(mode="state_pixels")#self.get_state()
+        self.render(mode='human')
         return state,reward,done,{}
     def get_state(self):
         state = np.fliplr(np.flip(np.rot90(pygame.surfarray.array3d(

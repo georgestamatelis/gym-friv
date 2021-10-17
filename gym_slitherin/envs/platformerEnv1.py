@@ -72,7 +72,7 @@ class player(object):
             else:
                 win.blit(walkLeft[0], (self.x, self.y))
         self.hitbox = (self.x + 17, self.y + 11, 29, 52)
-        pygame.draw.rect(win, (255,0,0), self.hitbox,2)
+        #pygame.draw.rect(win, (255,0,0), self.hitbox,2)
                
 class Block(object):
     def __init__(self,x,y,width,height,color=(0,0,0)):
@@ -86,7 +86,7 @@ class Block(object):
     def draw(self,win):
         self.hitbox = (self.x, self.y,self.width,self.height)
         pygame.draw.rect(win, self.color, self.hitbox,0)
-        pygame.draw.rect(win, (255,0,0), self.hitbox,2)
+        #pygame.draw.rect(win, (255,0,0), self.hitbox,2)
 
     def manOnBlock(self,man):
         rectA=pygame.Rect(self.hitbox)
@@ -95,7 +95,7 @@ class Block(object):
         #print(pygame.Rect.colliderect(rectA,rectB))
         if pygame.Rect.colliderect(rectA,rectB)==True:
             #print("self.y=",self.y,"many=",man.hitbox[1],"height=",man.hitbox[3])
-            if self.y>=man.hitbox[1] +4*man.hitbox[3]//5:
+            if self.y>=man.hitbox[1] +2*man.hitbox[3]//3:
                 return True
         #print(pygame.Rect.collidelistall(self.hitbox))
         return False
@@ -106,12 +106,7 @@ class Block(object):
         if self.manOnBlock(man):
             return False
         return pygame.Rect.colliderect(rectA,rectB)
-        #print(pygame.Rect.colliderect(rectA,rectB))
-        #if pygame.Rect.colliderect(rectA,rectB)==True:
-        #    if self.y+self.height >=man.y:#+man.height:
-        #        return True
-        #print(pygame.Rect.collidelistall(self.hitbox))
-        #return False
+        
 class Spikes(object):
     def __init__(self,x,y,width,height,color=(0,0,0)):
         self.x = x
@@ -133,7 +128,7 @@ class Spikes(object):
             xOk=True
         if self.x <= man.hitbox[0] +man.hitbox[2] <=self.x + self.width:
             xOk=True
-        #print("xOk=",xOk,"self.y=",self.y,"man.y=",man.y,"height=",self.height)
+
         if self.y-self.height<=man.y <=self.y:
             yOk=True
         return (xOk and yOk)
@@ -151,7 +146,7 @@ class Vacum(object):
 
     def draw(self,win):
         win.blit(self.img,(self.x,self.y))
-        pygame.draw.rect(win, (255,0,0), self.hitbox,2)
+        #pygame.draw.rect(win, (255,0,0), self.hitbox,2)
 class Coin:
     def __init__(self,x,y,radius,color=(200,150,0)):
         self.x = x
@@ -161,7 +156,7 @@ class Coin:
         self.hitbox=(self.x-self.radius,self.y-self.radius,2*self.radius,2*self.radius)
     def draw(self,win):
         pygame.draw.circle(win,self.color,(self.x,self.y),self.radius)
-        pygame.draw.rect(win, (255,0,0), self.hitbox,2)
+        #pygame.draw.rect(win, (255,0,0), self.hitbox,2)
 
 
 """
@@ -207,6 +202,7 @@ class agentPlatformerEnv(gym.Env, EzPickle):
     def reset(self):
         """
         """
+        self.totalTimeSteps=0
         self._destroy()
         #mainloop
         self.font = pygame.font.SysFont('comicsans', 30, True)
@@ -255,7 +251,7 @@ class agentPlatformerEnv(gym.Env, EzPickle):
         self.blocks.append(Block(575,500,50,50))
 
 
-        self.vel=1
+        self.vel=5
         self.onBlock=False
         #self.redraw(mode="rgb_array")
         observation=self.render(mode="state_pixels")#self.get_state()
@@ -275,6 +271,7 @@ class agentPlatformerEnv(gym.Env, EzPickle):
         7 fly left
         8 fly right
         """
+        self.totalTimeSteps+=1
 
         done=False
         reward=0
@@ -303,7 +300,7 @@ class agentPlatformerEnv(gym.Env, EzPickle):
                 if b.manCollides(self.man):
                     manCollides=True
             if manCollides==False:
-                self.man.y=self.man.y-self.man.vel -10 # 10 is to undo gravity    
+                self.man.y=self.man.y-self.man.vel -15 # 15 is to undo gravity    
                 inVacum=False
                 rectB=pygame.Rect(self.man.hitbox)
                 for v in self.vacums:
@@ -362,7 +359,7 @@ class agentPlatformerEnv(gym.Env, EzPickle):
         
             #print("self.ymin=",self.ymin)
         if self.man.y <=ymin and self.man.isJump==False and self.onBlock==False:
-            self.man.y += 10
+            self.man.y += 15
         if self.goalBlock.manOnBlock(self.man):
             done=True
             reward=1*0.75
@@ -390,8 +387,12 @@ class agentPlatformerEnv(gym.Env, EzPickle):
             if pygame.Rect.colliderect(rectA,rectB):
                 self.coins.remove(c)
                 reward=reward+(1/6)*0.25
+        if self.totalTimeSteps>=4000:
+            done=True
+            reward=-1
 
         state=self.render(mode="state_pixels")#self.get_state()
+        self.render(mode='human')
         return state,reward,done,{}
     def get_state(self):
         state = np.fliplr(np.flip(np.rot90(pygame.surfarray.array3d(

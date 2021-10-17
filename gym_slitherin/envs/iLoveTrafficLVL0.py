@@ -1,10 +1,8 @@
-from os import fwalk
 from gym import spaces
 from gym.core import ObservationWrapper, RewardWrapper
 import numpy as np
 import cv2
 
-from numpy.lib.function_base import trim_zeros
 import pygame
 
 import gym
@@ -22,7 +20,6 @@ WINDOW_H=500
 STATE_W = 96  # less than Atari 160x192
 STATE_H = 96
 
-SCALE = 6.0  
 FPS = 1  # Frames are taken care of by pygame
 assetsPath="/home/georgestamatelis/gym-slitherin/iLoveTraffic/"
 
@@ -30,7 +27,13 @@ bg = pygame.image.load(assetsPath+'background.png')
 bg = pygame.transform.scale(bg,(WINDOW_H,WINDOW_W))
 clock = pygame.time.Clock()
 
+"""for all trafic games the reward is shaped as follows
++1/num of cars to clear for any car cleared 
+-1 if cars collide or there is too much traffic 
 
+"""
+#this class animates the cars
+#the car is just a simple squares ,there are not mechanics or textures 
 class Car(object):
     def __init__(self,x,y,width,height,color=(0,0,0)):
         self.x = x

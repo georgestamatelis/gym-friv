@@ -4,7 +4,6 @@ from gym.core import ObservationWrapper
 import numpy as np
 import cv2
 
-from numpy.lib.function_base import trim_zeros
 import pygame
 
 import gym
@@ -15,9 +14,9 @@ from gym.envs.classic_control import rendering
 
 import math
 from gym.utils import seeding, EzPickle
+#in here there are the classes used by the environment
 from gym_slitherin.envs.onionClasses import *
 
-#from topDownCar import *
 FPS=27
 
 
@@ -30,6 +29,14 @@ pygame.display.set_caption("onionBoy")
 
 STATE_W = 130  # less than Atari 160x192
 STATE_H = 130
+"""
+the rewards are given as followed
+0.1/num enemies for killing an enemy
+0.1/num flying enemies for killing a flying enemy
+0.1 for killing the ball (To kill the ball you need to hop on it twice)
+0.1/num of coins for collection a coint
+0.6 for finishing
+"""
 class onionBoyEnv(gym.Env, EzPickle):
     metadata = {
         "render.modes": ["human", "rgb_array", "state_pixels"],

@@ -306,7 +306,7 @@ class spinSoccerEnv3(gym.Env,EzPickle):
             print("GOAL")
         if self.ball.position[1] <=0 or self.ball.position[0]<=0 or self.ball.position[0]>=600:
             done=True
-            reward=-1
+            reward=-0.7
             print("LOSS")
         if self.timeSteps >=1000 and reward==0:
             done=True

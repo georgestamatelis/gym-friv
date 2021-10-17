@@ -229,7 +229,7 @@ class agentPlatformerEnv3(gym.Env, EzPickle):
         self.goalBlock=Block(750,75,25,25,color=(255,255,255))
         self.movingDownwards=True
 
-
+        self.totalTimeSteps=0
 
 
        
@@ -256,7 +256,7 @@ class agentPlatformerEnv3(gym.Env, EzPickle):
         7 fly left
         8 fly right
         """
-
+        self.totalTimeSteps+=1
         done=False
         reward=0
         if (action==1 or action==5 or action==7) and self.man.x>=30:
@@ -365,8 +365,10 @@ class agentPlatformerEnv3(gym.Env, EzPickle):
                     self.man.x=self.man.x+2*self.vel
             #print("b.x=",b.x,"vel=",vel)
     #check coins collected
-        
-
+        if self.totalTimeSteps >=2000:
+            done=True
+            reward=-1
+            print("TIME OUT")
         state=self.render(mode="state_pixels")#self.get_state()
         return state,reward,done,{}
     def get_state(self):

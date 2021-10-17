@@ -1,10 +1,8 @@
-from os import fwalk
 from gym import spaces
 from gym.core import ObservationWrapper, RewardWrapper
 import numpy as np
 import cv2
 
-from numpy.lib.function_base import trim_zeros
 import pygame
 
 import gym
@@ -22,7 +20,6 @@ WINDOW_H=500
 STATE_W = 96  # less than Atari 160x192
 STATE_H = 96
 
-SCALE = 6.0  
 FPS = 1  # Frames are taken care of by pygame
 assetsPath="/home/georgestamatelis/gym-slitherin/iLoveTraffic/"
 

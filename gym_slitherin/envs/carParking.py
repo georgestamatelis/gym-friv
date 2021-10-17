@@ -1,9 +1,7 @@
-from gym_slitherin.envs.hill_climber_env import VIEWPORT_H, VIEWPORT_W
 import sys
 import math
 import numpy as np
 import cv2
-
 import Box2D
 from Box2D.b2 import fixtureDef
 from Box2D.b2 import polygonShape
@@ -20,15 +18,15 @@ import pyglet
 
 pyglet.options["debug_gl"] = False
 from pyglet import gl
-
+#from topDownCar import *
+from gym_slitherin.envs.topDownCar import *
 
 VIEWPORT_W = 1000
-VIEWPORT_H = 1000
-STATE_W = 96  # less than Atari 160x192
-STATE_H = 96
-
+VIEWPORT_H = 800
+STATE_H = 100
+STATE_W = 100
 SCALE = 6.0  
-FPS = 1  # Frames per second
+FPS = 62  # Frames per second
 
 
 
@@ -39,11 +37,13 @@ Based on Chris Campbell's tutorial from iforce2d.net:
 http://www.iforce2d.net/b2dtut/top-down-car
 """
 
+from Box2D.examples.framework import (Framework, Keys, main)
 import math
-from gym_slitherin.envs.topDownCar import *
 
 
-class CarParking(gym.Env, EzPickle):
+
+
+class CarParking1(gym.Env, EzPickle):
     metadata = {
         "render.modes": ["human", "rgb_array", "state_pixels"],
         "video.frames_per_second": FPS,
@@ -65,7 +65,7 @@ class CarParking(gym.Env, EzPickle):
         
 
         self.observation_space = spaces.Box(
-            low=0, high=255, shape=(STATE_H,STATE_W, 3), dtype=np.uint8
+            low=0, high=255, shape=(STATE_H, STATE_W, 3), dtype=np.uint8
         )
                 # The walls
         self.obs=[]
@@ -76,7 +76,6 @@ class CarParking(gym.Env, EzPickle):
         self.np_random, seed = seeding.np_random(seed)
         return [seed]
 
-    
     def _destroy(self):
         """
        
@@ -92,6 +91,7 @@ class CarParking(gym.Env, EzPickle):
         self.keysPressed=[]
 
     def reset(self):
+        self.totalTimeSteps=0
         self._destroy()
         self.tires=[]
         self.cars=[]
@@ -99,18 +99,18 @@ class CarParking(gym.Env, EzPickle):
         self.hasLost=False
         self.hasWon=False
         self.boundary = self.world.CreateStaticBody(position=(0, 0))
-        self.boundary.CreateEdgeChain([(-300, -300),
-                                  (-300, 300),
-                                  (600, 300),
-                                  (600, -300),
-                                  (-300, -300)]
+        self.boundary.CreateEdgeChain([(-50, -50),
+                                  (-50, 50),
+                                  (100, 50),
+                                  (100, -50),
+                                  (-50, -50)]
                                  )
         self.boundary.color=(0.5,0,0.5)
         self.boundary.userData="Boundary"
         self.obs.append(self.boundary)
         self.grounds.append(self.boundary)
         # A couple regions of differing traction
-        self.car = TDCar(self.world)
+        self.car = TDCar(self.world,position=(-20,-40))
         self.car.body.color=Box2D.b2Color(0.2,0.7, 0)
 
         self.obs.append(self.car.body)
@@ -121,9 +121,8 @@ class CarParking(gym.Env, EzPickle):
             self.tires.append(t.body)
         #add aditional cars 
         #car 2
-        """
-        self.car2 = TDCar(self.world,position=(-20,-30))
-        self.car2.body.color=Box2D.b2Color(0.9,0.1, 0)
+        self.car2 = TDCar(self.world,position=(15,-15))
+        self.car2.body.color=Box2D.b2Color(0.0,0.2, 0.9)
         self.car2.body.userData="Pavement"
     
         self.obs.append(self.car2.body)
@@ -132,9 +131,10 @@ class CarParking(gym.Env, EzPickle):
             t.color=Box2D.b2Color(0,0,0)
             self.obs.append(t.body)
             self.tires.append(t.body)
+
         #car 3
-        self.car3 = TDCar(self.world,position=(-30,-30))
-        self.car3.body.color=Box2D.b2Color(0.9,0.1, 0)
+        self.car3 = TDCar(self.world,position=(25,-15))
+        self.car3.body.color=Box2D.b2Color(0.0,0.1, 0.4)
         self.car3.body.userData="Pavement"
     
         self.obs.append(self.car3.body)
@@ -143,73 +143,79 @@ class CarParking(gym.Env, EzPickle):
             t.color=Box2D.b2Color(0,0,0)
             self.obs.append(t.body)
             self.tires.append(t.body)
-        """
+        
+        #car 4
+        self.car4 = TDCar(self.world,position=(40,-15))
+        self.car4.body.color=Box2D.b2Color(0.2,0.2, 0.2)
+        self.car4.body.userData="Pavement"
+    
+        self.obs.append(self.car4.body)
+        self.cars.append(self.car4.body)
+        for t in self.car4.tires:
+            t.color=Box2D.b2Color(0,0,0)
+            self.obs.append(t.body)
+            self.tires.append(t.body)
+       
         #this is the goal parking spot
         self.gnd1 = self.world.CreateStaticBody()
         fixture = self.gnd1.CreatePolygonFixture(
-            box=(7, 7.5, (-5, -22.5), math.radians(0)))
+            box=(4,7, (50, 31), math.radians(90)))
         self.gnd1.color=Box2D.b2Color(1, 1, 0)
         self.gnd1.userData="Spot"
         # Set as sensors so that the car doesn't collide
         fixture.sensor = True
-        self.grounds.append(self.gnd1)
         self.obs.append(self.gnd1)
-        """
-        
+        self.grounds.append(self.gnd1)
         #first obstacle
         self.gnd2 = self.world.CreateStaticBody()
         fixture = self.gnd2.CreatePolygonFixture(
-            box=(10, 35, (10, 0), math.radians(0)))
+            box=(5, 25, (5, -25), math.radians(0)))
         fixture.sensor = True
         self.gnd2.color=Box2D.b2Color(0, 0, 0.7)
         self.gnd2.userData="Pavement"
-        self.obs.append(self.gnd2)
-        self.grounds.append(self.gnd2)
+        #top obstacle
+        fixture = self.gnd2.CreatePolygonFixture(
+            box=(7.5, 75, (25, 42.5), math.radians(90)))
+        fixture.sensor = True
+        self.gnd2.color=Box2D.b2Color(0, 0, 0.7)
+        self.gnd2.userData="Pavement"
 
-        #sekecond obstacle
+        fixture = self.gnd2.CreatePolygonFixture(
+            box=(5, 25, (-30, -25), math.radians(0)))
+        fixture.sensor = True
+        self.gnd2.color=Box2D.b2Color(0, 0, 0.7)
+        self.gnd2.userData="Pavement"
+        
+        fixture = self.gnd2.CreatePolygonFixture(
+            box=(5, 50, (50, 0), math.radians(90)))
+        fixture.sensor = True
+        self.gnd2.color=Box2D.b2Color(0, 0, 0.7)
+        self.gnd2.userData="Pavement"
+        self.grounds.append(self.gnd2)
+        self.obs.append(self.gnd2)
+
+
+        
+        #second obstacle
         self.gnd3 = self.world.CreateStaticBody()
         fixture = self.gnd3.CreatePolygonFixture(
-            box=(10, 25, (-5,-40), math.radians(90)))
+            box=(2, 17.5, (-30,17.5), math.radians(0))
+        )
         fixture.sensor = True
-        self.gnd3.color=Box2D.b2Color(0, 0, 0.7)
+        #fixture2= self.gnd3.CreatePolygonFixture(
+         #  box=(10, 30, (-25,0), math.radians(00))
+        #)
+        #fixture2.sensor = True
+        self.gnd3.color=Box2D.b2Color(1, 0.5, 0)
         self.gnd3.userData="Pavement"
-        self.obs.append(self.gnd3)
         self.grounds.append(self.gnd3)
-
+        self.obs.append(self.gnd3)
+        
         #third obstacle 
 
-        self.gnd4 = self.world.CreateStaticBody()
-        fixture = self.gnd4.CreatePolygonFixture(
-            box=(15, 10, (-35, 40), math.radians(0)))
-        fixture.sensor = True
-        self.gnd4.color=Box2D.b2Color(0, 0, 0.7)
-        self.gnd4.userData="Pavement"
-        self.obs.append(self.gnd4)
-        self.grounds.append(self.gnd4)
+    
 
-
-        #fourth obstacle
-        self.gnd5 = self.world.CreateStaticBody()
-        fixture = self.gnd5.CreatePolygonFixture(
-            box=(50, 5, (50, 0), math.radians(90)))
-        fixture.sensor = True
-        self.gnd5.color=Box2D.b2Color(0, 0, 0.7)
-        self.gnd5.userData="Pavement"
-        self.obs.append(self.gnd5)
-        self.grounds.append(self.gnd5)
-
-        #fifth obstacle
-        self.gnd6 = self.world.CreateStaticBody()
-        fixture = self.gnd6.CreatePolygonFixture(
-            box=(50, 5, (80, 0), math.radians(90)))
-        fixture.sensor = True
-        self.gnd6.color=Box2D.b2Color(0, 0, 0.7)
-        self.gnd6.userData="Pavement"
-        self.obs.append(self.gnd6)
-        self.grounds.append(self.gnd6)
-
-        """
-        return self.step(None)[0]
+        return self.step([2,2])[0]
 
     def step(self, action):
         #a[1] is about gass
@@ -226,6 +232,7 @@ class CarParking(gym.Env, EzPickle):
             8 = backward right
         """    
         keys=[]
+        self.totalTimeSteps+=1
         if action == 1 :
             keys.append("left")
         if action == 2 :
@@ -246,26 +253,30 @@ class CarParking(gym.Env, EzPickle):
         if action ==8 :
             keys.append("down")
             keys.append("right")
-        self.car.update(keys,50)
+        self.car.update(keys,60)
         #run a step of physics simulation
-        timeStep = 1.0 / 50 
-        vel_iters, pos_iters = 5, 2
+        timeStep = 1.0 / 60 
+        vel_iters, pos_iters = 6, 2
         self.world.Step(timeStep, vel_iters, pos_iters)
 
         self.state=self.render(mode="rgb_array")
         done=False
-        reward=-0.1
+        reward=0
+        #try reward=0 ,+-1
         if self.hasLost==True:
             done=True
-            #try giving a large negative reward
-            #e.g 
-            #reward=-1000
+            reward=-0.7
         if self.checkParking() ==True:
             done=True
-            reward=1000
+            reward=1
             print("VICTORY")
-        
+        if self.totalTimeSteps >=2500 and done==False:
+            reward=-1
+            done=True
+            print("time out")
+        #print("ts=",self.totalTimeSteps)
         return self.state,reward,done,{}
+
 
     def render(self, mode="human"):
         
@@ -276,7 +287,7 @@ class CarParking(gym.Env, EzPickle):
             from gym.envs.classic_control import rendering
 
             self.viewer = rendering.Viewer(VIEWPORT_W, VIEWPORT_H)
-            self.viewer.set_bounds(-350, (VIEWPORT_W-350), -450, (VIEWPORT_H-450))
+            self.viewer.set_bounds(-350/SCALE, (VIEWPORT_W-350)/SCALE, -450/SCALE, (VIEWPORT_H-450)/SCALE)
 
 
         for obj in self.grounds:
@@ -345,7 +356,7 @@ class CarParking(gym.Env, EzPickle):
                             self.viewer.draw_polygon(tv)
 
         if mode=="rgb_array":       
-            arr= self.viewer.get_array()#viewer.render(return_rgb_array=True)
+            arr= self.viewer.render(return_rgb_array=True)
             arr=cv2.resize(arr,(STATE_H,STATE_W))
             return arr 
         if mode=="human":
@@ -371,7 +382,6 @@ class CarParking(gym.Env, EzPickle):
         if count==4 and -1 <= self.car.body.linearVelocity[0]<=1:
             return True
         return False
-
     def close(self):
         if self.viewer is not None:
             self.viewer.close()
@@ -383,6 +393,8 @@ class CarParking(gym.Env, EzPickle):
 
 ########################################################################################
     
+
+
 if __name__ == "__main__":
     from pyglet.window import key
 
@@ -413,7 +425,7 @@ if __name__ == "__main__":
         if k == key.UP and a[1]==1:
             a[1] = 2
 
-    env = CarParking()
+    env = CarParking1()
     env.render()
     env.viewer.window.on_key_press = key_press
     env.viewer.window.on_key_release = key_release
@@ -479,4 +491,3 @@ if __name__ == "__main__":
             if done or restart or isopen == False:
                 break
     env.close()
-

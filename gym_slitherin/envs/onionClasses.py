@@ -15,7 +15,7 @@ clock = pygame.time.Clock()
 """
 CLASSES USED BY THE ACTUAL ENVIRONMENT / GAME
 """
-
+#onion boy
 class player(object):
     def __init__(self,x,y,width,height):
         self.x = x

@@ -245,7 +245,7 @@ class spinSoccerEnv1(gym.Env,EzPickle):
         1 spin(all platforms) counterClock wise
         2 spin(all platforms) clock wise 
         """
-        print("action=",action)
+        #print("action=",action)
         assert action in [None,0,1,2]
         self.timeSteps+=1
         if action==1:

@@ -2,7 +2,7 @@ import gym
 import matplotlib.pyplot as plt
 from stable_baselines3.common.env_checker import check_env
 import cv2
-env = gym.make("gym_slitherin:spinSoccer-v1") 
+env = gym.make("gym_slitherin:eyeCopter-v0") 
 #env = gym.make("gym_slitherin:onionBoyEnv-v0")
 #env = gym.make("gym_slitherin:agentPlatformer-v3")
 

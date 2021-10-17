@@ -1,7 +1,4 @@
-from gym_slitherin.envs.eyeCopterEnv1 import STATE_H
 import numpy as np 
-from os import fwalk
-from numpy.lib.function_base import trim_zeros
 import pygame
 import random
 import cv2 
@@ -15,11 +12,17 @@ import os
 from gym import Env, spaces
 import time
 import random
+
 font = cv2.FONT_HERSHEY_COMPLEX_SMALL 
 clock = pygame.time.Clock()
-
+#the assets are here
 assetsPath="/home/georgestamatelis/gym-slitherin/chickenGo/"
-
+"""
+On both games 
+reward = 0.3 for reaching the logs, 
+0.2 for reaching the second road 
+and 0.5 for finishing
+"""
 class Chicken(object):
     walkRight = [pygame.image.load(assetsPath+'R1.png'), pygame.image.load(assetsPath+'R2.png'), pygame.image.load(assetsPath+'R3.png'), pygame.image.load(assetsPath+'R4.png'), pygame.image.load(assetsPath+'R5.png'), pygame.image.load(assetsPath+'R6.png'), pygame.image.load(assetsPath+'R7.png')]
     walkLeft = [pygame.image.load(assetsPath+'L1.png'), pygame.image.load(assetsPath+'L2.png'), pygame.image.load(assetsPath+'L3.png'), pygame.image.load(assetsPath+'L4.png'), pygame.image.load(assetsPath+'L5.png'), pygame.image.load(assetsPath+'L6.png'), pygame.image.load(assetsPath+'L7.png')]

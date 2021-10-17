@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 
 
 #env = gym.make("gym_slitherin:zombieOnslaught-v0") 
-env = gym.make("gym_slitherin:spinSoccer-v1")
+env = gym.make("gym_slitherin:CarParking-v0")
 #env = gym.make("gym_slitherin:onionBoyEnv-v0") 
 
 

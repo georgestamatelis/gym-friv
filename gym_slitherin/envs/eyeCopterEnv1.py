@@ -1,10 +1,8 @@
-from os import fwalk
 from gym import spaces
 from gym.core import ObservationWrapper
 import numpy as np
 import cv2
 
-from numpy.lib.function_base import trim_zeros
 import pygame
 
 import gym
@@ -16,21 +14,29 @@ from gym.envs.classic_control import rendering
 import math
 from gym.utils import seeding, EzPickle
 
-VIEWPORT_W = 1000
-VIEWPORT_H = 1000
 STATE_W = 96  # less than Atari 160x192
 STATE_H = 96
 
 SCALE = 6.0  
 FPS = 1  # Frames are taken care of by pygame
 
-
+#global variables determining where the sprites for animation are placed 
 assetsPath="/home/georgestamatelis/gym-slitherin/eyeCopter/"
 flying = [pygame.image.load(assetsPath+'F1.png'), pygame.image.load(assetsPath+'F2.png'), pygame.image.load(assetsPath+'F3.png'), pygame.image.load(assetsPath+'F4.png'), pygame.image.load(assetsPath+'F5.png')]
 bg = pygame.image.load('/home/georgestamatelis/gym-slitherin/eyeCopter/EyeCopterBG.png')
 bg = pygame.transform.scale(bg,(900,700))
 char = pygame.image.load(assetsPath+'standing.png')
 grassPic=pygame.image.load(assetsPath+'grassBG.png')
+"""
+reward is 
+0.3/(num of coins ) for each coin collected
+0.1 for collecting the diamong
+0.6 for bringing the diamond to the base
+"""
+
+
+
+#this class moves and animates the helicopter
 class player(object):
     def __init__(self,x,y,width,height):
         self.x = x
@@ -81,14 +87,11 @@ class Block(object):
     def manOnBlock(self,man):
         rectA=pygame.Rect(self.hitbox)
         rectB=pygame.Rect(man.hitbox)
-        #print(rectB)
-        #print(pygame.Rect.colliderect(rectA,rectB))
+       
         if pygame.Rect.colliderect(rectA,rectB)==True:
             if self.y>=man.hitbox[1] +2*man.hitbox[3]//3:           
                 return True
-        #if self.y==380 and self.x ==60:
-        #    print("self.y=",self.y,"many=",man.hitbox[1],"height=",man.hitbox[3])
-        #print(pygame.Rect.collidelistall(self.hitbox))
+        
         return False
         
     def manCollides(self,man):#a collision happened but man is not above the block
@@ -121,6 +124,7 @@ class Diamond:
         self.hitbox=(self.x,self.y+20,45,25)
         #pygame.draw.rect(win, (255,0,0), self.hitbox,2)
         win.blit(self.img,(self.x,self.y))
+        
 class Platform:
     def __init__(self,x,y,):
         self.x = x
@@ -151,8 +155,8 @@ class Goal:
         self.hitbox=(self.x,self.y+20,45,25)
     def draw(self,win):
              
-        #pygame.draw.rect(win, (255,0,0), self.hitbox,2)
         win.blit(self.img,(self.x,self.y))
+
 class eyeCopterEnv1(gym.Env):
     metadata = {
         "render.modes": ["human", "rgb_array", "state_pixels"],
@@ -161,7 +165,10 @@ class eyeCopterEnv1(gym.Env):
 
     def __init__(self, verbose=1):
         """
-        
+        the player moves the helicopter trying to collect the diamond and then 
+        bring back to the goal/base for take off. Bonus points for coins collected. 
+        If the helicopter moves out of site it is lost. If the player takes too long
+        they loose
         """
         pygame.init()
         self.win = pygame.display.set_mode((900,700))
@@ -177,10 +184,14 @@ class eyeCopterEnv1(gym.Env):
         5 fly right
         """
         self.action_space=spaces.Discrete(6)
+        """
+        the state is a STATE_H x STATE_W SCREENSHOT OF THE GAME CONSOLE
+        """
         self.observation_space = spaces.Box(
             low=0, high=255, shape=(STATE_H,STATE_W, 3), dtype=np.uint8
         )
     def reset(self) :
+        self.totalTimeSteps=0
         self.font = pygame.font.SysFont('comicsans', 30, True)
         self.man = player(20, 280, 64,64)
         self.goal = Diamond(840,300)
@@ -228,6 +239,7 @@ class eyeCopterEnv1(gym.Env):
 
         self.onBlock=False
         observation=self.render(mode="state_pixels")#self.get_state()
+        self.render(mode='human')
         #state = np.fliplr(np.flip(np.rot90(pygame.surfarray.array3d(
         #     pygame.display.get_surface()).astype(np.uint8))))
         return observation
@@ -241,6 +253,7 @@ class eyeCopterEnv1(gym.Env):
         4 fly left
         5 fly right
         """
+        self.totalTimeSteps+=1
         reward=0
         done=False
         self.onBlock=False
@@ -248,12 +261,10 @@ class eyeCopterEnv1(gym.Env):
             if b.manOnBlock(self.man):
                 self.onBlock=True
                 self.man.flying=False
-        #print("fookin man=",self.man.hitbox[0],self.man.hitbox[1])
-        #print((-20<=self.man.hitbox[0] <= 180),260<=self.man.hitbox[1]<=390)
+        
         if (-20<=self.man.hitbox[0] <= 180) or (670<=self.man.hitbox[0]<=930):
             if 290<=self.man.hitbox[1]<=360:
                 self.onBlock=True
-                #print("WTF FUUUUUUUUUUUCK")
         if self.onBlock==False:
             self.man.y+=2*self.man.vel
         if  action==2 or action==4 :
@@ -330,7 +341,13 @@ class eyeCopterEnv1(gym.Env):
             print("GAME OVER")
             reward=-1
             done=True
+        if self.totalTimeSteps >=2000:
+            done=True
+            reward=-1
+            print("TIME OUT")
         state=self.render(mode="state_pixels")#self.get_state()
+        self.render(mode='human')
+        
         return state,reward,done,{}
     def get_state(self):
         state = np.fliplr(np.flip(np.rot90(pygame.surfarray.array3d(
@@ -373,6 +390,7 @@ class eyeCopterEnv1(gym.Env):
             img=cv2.resize(img,(STATE_H,STATE_W))
             return img
 #main function for user play
+#just type python3 <path to file> /eyeCopterEnv1.py to play as a human agent
 if __name__ == "__main__":
     run=True
     env=eyeCopterEnv1()

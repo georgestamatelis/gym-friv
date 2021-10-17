@@ -1,4 +1,3 @@
-from gym_slitherin.envs.hill_climber_env import VIEWPORT_H, VIEWPORT_W
 import sys
 import math
 import numpy as np
@@ -392,7 +391,7 @@ class carParking2(gym.Env, EzPickle):
                             self.viewer.draw_polygon(tv)
 
         if mode=="rgb_array":       
-            arr= self.viewer.get_array()#viewer.render(return_rgb_array=True)
+            arr= self.viewer.render(return_rgb_array=True)
             return arr 
         if mode=="human":
             return self.viewer.render()

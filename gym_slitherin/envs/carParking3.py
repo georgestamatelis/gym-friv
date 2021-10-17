@@ -1,4 +1,3 @@
-from gym_slitherin.envs.hill_climber_env import VIEWPORT_H, VIEWPORT_W
 import sys
 import math
 import numpy as np
@@ -266,7 +265,7 @@ class CarParking3(gym.Env, EzPickle):
         #try reward=0 ,+-1
         if self.hasLost==True:
             done=True
-            reward=-1
+            reward=-0.7
         if self.checkParking() ==True:
             done=True
             reward=1
@@ -357,7 +356,7 @@ class CarParking3(gym.Env, EzPickle):
                             self.viewer.draw_polygon(tv)
 
         if mode=="rgb_array":       
-            arr= self.viewer.get_array()#viewer.render(return_rgb_array=True)
+            arr= self.viewer.render(return_rgb_array=True)
             arr=cv2.resize(arr,(STATE_H,STATE_W))
             return arr 
         if mode=="human":
