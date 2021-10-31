@@ -9,9 +9,9 @@ from stable_baselines3.common.env_checker import check_env
 from stable_baselines3.common.noise import NormalActionNoise
 import numpy as np
 
-#env = gym.make("gym_slitherin:onionBoyEnv-v0") 
-#env = gym.make("gym_slitherin:-v2") 
-env = gym.make("gym_slitherin:chickenGoEnv-v0")
+env = gym.make("gym_friv:zombieOnslaught-v1") 
+
+#env = gym.make("gym_friv:chickenGoEnv-v1")
 
 print("FIRST WILL CHECK IF ENV IS OK")
 check_env(env)
@@ -30,10 +30,10 @@ model = A2C(
 
 model.learn(
     total_timesteps= 2000000,eval_env=env,
-    eval_freq=50000,n_eval_episodes=5
+    eval_freq=10000,n_eval_episodes=5
     ) 
 print("learning done") 
-model.save("A2C-CHICKEN-SLOW")
+model.save("A2C-ZOMBIE")
 #print("model Saved")
 obs = env.reset()
 for i in range(100000):

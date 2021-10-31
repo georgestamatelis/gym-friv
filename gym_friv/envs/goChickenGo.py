@@ -130,6 +130,8 @@ class chickenGoEnv(Env):
 
         self.totalTimeSteps=0
         observation=self.render(mode="state_pixels")
+        self.render(mode='human')
+
         return observation
         
     def get_state(self):
@@ -262,7 +264,7 @@ class chickenGoEnv(Env):
             return state,reward,done,{}
         if self.c.y <=-30 or self.c.y >=530:
             print("OUT OF BOUNDS")
-            reward=-1
+            reward=-0.7
             done=True
             state=self.render(mode="state_pixels")
             return state,reward,done,{}
@@ -273,7 +275,7 @@ class chickenGoEnv(Env):
             #print(pygame.Rect.colliderect(rectA,rectB))
             if pygame.Rect.colliderect(rectA,rectB)==True:
                 print("COLISSION GAME OVER")
-                reward=-1
+                reward=-0.7
                 done=True
                 state=self.render(mode="state_pixels")
                 return state,reward,done,{}
@@ -285,9 +287,14 @@ class chickenGoEnv(Env):
             done=True
             state=self.render(mode="state_pixels")
             return state,reward,done,{}
+        if self.totalTimeSteps >=6000 :
+            print("TIME OUT")
+            reward=-1
+            done=True
         if self.hasReachedSecondRoad==False and self.c.x >=510:
             reward+=0.2
             self.hasReachedSecondRoad=True
+        self.render(mode='human')
         state=self.render(mode="state_pixels")
         return state,reward,done,{}
 

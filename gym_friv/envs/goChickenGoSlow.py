@@ -141,6 +141,7 @@ class chickenGoEnvSlow(Env):
 
         self.totalTimeSteps=0
         observation=self.render(mode="state_pixels")
+        self.render(mode='human')
         return observation
         
     def get_state(self):
@@ -230,7 +231,7 @@ class chickenGoEnvSlow(Env):
         """
         GENERATE LOGS AND CARS
         """
-        if self.totalTimeSteps %50 ==0:
+        if self.totalTimeSteps %40 ==0:
             self.logs.append(log(420,520,-2))
             self.logs.append(log(490,-20,2))
         if self.totalTimeSteps %120==0 or self.totalTimeSteps ==50 :
@@ -257,7 +258,7 @@ class chickenGoEnvSlow(Env):
             #print(rectB)
             #print(pygame.Rect.colliderect(rectA,rectB))
             if pygame.Rect.colliderect(rectA,rectB)==True:
-                self.c.y+=l.vel*2#*3
+                self.c.y+=l.vel*3
                 onLog=True
                 if self.hasReachedLogs==False:
                     reward+=0.3
@@ -267,13 +268,13 @@ class chickenGoEnvSlow(Env):
                 self.logs.remove(l)
         if 390<=self.c.x<=506 and onLog==False:
             print("DROWN")
-            reward=-1
+            reward=-0.7 
             done=True
             state=self.render(mode="state_pixels")
             return state,reward,done,{}
         if self.c.y <=-30 or self.c.y >=530:
             print("OUT OF BOUNDS")
-            reward=-1
+            reward=-0.7
             done=True
             state=self.render(mode="state_pixels")
             return state,reward,done,{}
@@ -283,7 +284,7 @@ class chickenGoEnvSlow(Env):
             #detect collision with chicken
             if pygame.Rect.colliderect(rectA,rectB)==True:
                 print("COLISSION GAME OVER")
-                reward=-1
+                reward=-0.7
                 done=True
                 state=self.render(mode="state_pixels")
                 return state,reward,done,{}
@@ -298,7 +299,12 @@ class chickenGoEnvSlow(Env):
         if self.hasReachedSecondRoad==False and self.c.x >=510:
             reward+=0.2
             self.hasReachedSecondRoad=True
+        if self.totalTimeSteps >=5000:
+            print("TIME OUT")
+            done=True
+            reward=-1
         state=self.render(mode="state_pixels")
+        self.render(mode='human')
         return state,reward,done,{}
 
 

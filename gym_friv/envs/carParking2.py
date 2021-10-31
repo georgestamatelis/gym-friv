@@ -1,6 +1,7 @@
 import sys
 import math
 import numpy as np
+import cv2
 
 import Box2D
 from Box2D.b2 import fixtureDef
@@ -11,7 +12,6 @@ from Box2D import (b2CircleShape, b2EdgeShape, b2FixtureDef, b2PolygonShape,b2_p
 
 import gym
 from gym import spaces
-from gym.envs.box2d.car_dynamics import Car
 from gym.utils import seeding, EzPickle
 
 import pyglet
@@ -19,9 +19,12 @@ import pyglet
 pyglet.options["debug_gl"] = False
 from pyglet import gl
 #from topDownCar import *
+from gym_friv.envs.topDownCar import *
 
 VIEWPORT_W = 1000
 VIEWPORT_H = 800
+STATE_H = 100
+STATE_W = 100
 
 SCALE = 6.0  
 FPS = 60  # Frames per second
@@ -41,7 +44,7 @@ import math
 
 
 
-class carParking2(gym.Env, EzPickle):
+class CarParking2(gym.Env, EzPickle):
     metadata = {
         "render.modes": ["human", "rgb_array", "state_pixels"],
         "video.frames_per_second": FPS,
@@ -63,7 +66,7 @@ class carParking2(gym.Env, EzPickle):
         
 
         self.observation_space = spaces.Box(
-            low=0, high=255, shape=(VIEWPORT_H, VIEWPORT_W, 3), dtype=np.uint8
+            low=0, high=255, shape=(STATE_H, STATE_W, 3), dtype=np.uint8
         )
                 # The walls
         self.obs=[]
@@ -392,6 +395,7 @@ class carParking2(gym.Env, EzPickle):
 
         if mode=="rgb_array":       
             arr= self.viewer.render(return_rgb_array=True)
+            arr=cv2.resize(arr,(STATE_H,STATE_W))
             return arr 
         if mode=="human":
             return self.viewer.render()
@@ -457,7 +461,7 @@ if __name__ == "__main__":
         if k == key.UP and a[1]==1:
             a[1] = 2
 
-    env = carParking2()
+    env = CarParking2()
     env.render()
     env.viewer.window.on_key_press = key_press
     env.viewer.window.on_key_release = key_release

@@ -246,6 +246,8 @@ class onionBoyEnv(gym.Env, EzPickle):
         observation=self.render(mode="state_pixels")#self.get_state()
         #state = np.fliplr(np.flip(np.rot90(pygame.surfarray.array3d(
         #     pygame.display.get_surface()).astype(np.uint8))))
+        self.render()
+
         return observation
     def step(self, action):
         """
@@ -453,6 +455,8 @@ class onionBoyEnv(gym.Env, EzPickle):
             reward=-1
             print("time run out")
         state=self.render(mode="state_pixels")#self.get_state()
+        self.render()
+
         return state,reward,done,{}
     def get_state(self):
         state = np.fliplr(np.flip(np.rot90(pygame.surfarray.array3d(

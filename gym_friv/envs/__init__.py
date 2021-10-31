@@ -7,8 +7,7 @@ from gym_friv.envs.zombieOnslaught2 import zombieOnslaughtHardEnv
 
 
 from gym_friv.envs.carParking import CarParking1
-from gym_friv.envs.carParking2 import carParking2
-from gym_friv.envs.carParking3 import CarParking3
+from gym_friv.envs.carParking2 import CarParking2
 
 from gym_friv.envs.platformerEnv1 import agentPlatformerEnv
 from gym_friv.envs.platformerEnv2 import agentPlatformerEnv2

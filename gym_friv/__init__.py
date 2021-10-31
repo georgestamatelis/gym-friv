@@ -8,7 +8,7 @@ register(id='zombieOnslaught-v1',entry_point='gym_friv.envs:zombieOnslaughtHardE
 register(id='hill-climber-v0',entry_point='gym_friv.envs:Hill_Climber_Env',)
 
 register(id='CarParking-v0',entry_point='gym_friv.envs:CarParking1',)
-register(id='CarParking-v3',entry_point='gym_friv.envs:CarParking3',)
+register(id='CarParking-v2',entry_point='gym_friv.envs:CarParking2',)
 
 register(id='agentPlatformer-v0',entry_point='gym_friv.envs:agentPlatformerEnv',)
 register(id='agentPlatformer-v2',entry_point='gym_friv.envs:agentPlatformerEnv2',)

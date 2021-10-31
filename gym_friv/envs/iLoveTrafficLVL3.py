@@ -17,8 +17,8 @@ from gym.utils import seeding, EzPickle
 
 WINDOW_W=500
 WINDOW_H=500
-STATE_W = 96  # less than Atari 160x192
-STATE_H = 96
+STATE_W = 100  # less than Atari 160x192
+STATE_H = 100
 
 FPS = 1  # Frames are taken care of by pygame
 assetsPath="./iLoveTraffic/"
