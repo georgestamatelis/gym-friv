@@ -10,9 +10,9 @@ from stable_baselines3.common.noise import NormalActionNoise
 import numpy as np
 
 #env = gym.make("gym_slitherin:onionBoyEnv-v0") 
-env = gym.make("gym_friv:traffic-v1") 
+env = gym.make("gym_friv:traffic-v4") 
 
-model=PPO.load("PPO-TRAFFIC-1")
+model=PPO.load("PPO-TRAFFIC")
 
 obs = env.reset()
 for i in range(100000):

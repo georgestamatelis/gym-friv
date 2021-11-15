@@ -17,7 +17,6 @@ from gym.utils import seeding, EzPickle
 STATE_W = 96  # less than Atari 160x192
 STATE_H = 96
 
-SCALE = 6.0  
 FPS = 1  # Frames are taken care of by pygame
 
 #global variables determining where the sprites for animation are placed 

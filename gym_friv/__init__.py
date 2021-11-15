@@ -32,3 +32,6 @@ register(id='spinSoccer-v0',entry_point='gym_friv.envs:spinSoccerEnv',)
 register(id='spinSoccer-v1',entry_point='gym_friv.envs:spinSoccerEnv1',)
 register(id='spinSoccer-v2',entry_point='gym_friv.envs:spinSoccerEnv2',)
 register(id='spinSoccer-v3',entry_point='gym_friv.envs:spinSoccerEnv3',)
+
+
+register(id='pumpkin-v1',entry_point='gym_friv.envs:bossLevelPumpkin1',)

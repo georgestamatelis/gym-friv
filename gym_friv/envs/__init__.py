@@ -28,3 +28,5 @@ from gym_friv.envs.spinSoccer0 import spinSoccerEnv
 from gym_friv.envs.spinSoccer1 import spinSoccerEnv1
 from gym_friv.envs.spinSoccer2 import spinSoccerEnv2
 from gym_friv.envs.spinSoccer3 import spinSoccerEnv3
+
+from gym_friv.envs.bossLevelPumpkin1 import bossLevelPumpkin1

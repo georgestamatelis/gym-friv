@@ -11,7 +11,7 @@ import numpy as np
 
 #env = gym.make("gym_slitherin:onionBoyEnv-v0") 
 #env = gym.make("gym_slitherin:-v2") 
-env = gym.make("gym_friv:chickenGoEnv-v1")
+env = gym.make("gym_friv:pumpkin-v1")
 
 print("FIRST WILL CHECK IF ENV IS OK")
 check_env(env)
@@ -23,7 +23,7 @@ print(env.action_space)
 
 model = PPO(
     'CnnPolicy',env,verbose=1,
-    create_eval_env=True,clip_range=0.3,
+    create_eval_env=True,clip_range=0.1,
     seed=185
    
     )
@@ -34,11 +34,11 @@ model = PPO(
 
 #378880
 model.learn(
-    total_timesteps= 3000000,eval_env=env,
-    eval_freq=50000,n_eval_episodes=5
+    total_timesteps= 1500000,eval_env=env,
+    eval_freq=25000,n_eval_episodes=5
     ) 
 print("learning done") 
-model.save("PPO-CHICKEN-FAST")
+model.save("PPO-PUMPKIN-1")
 #print("model Saved")
 obs = env.reset()
 for i in range(100000):
