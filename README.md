@@ -1,1 +1,1 @@
-# gym-slitherin
+# gym-friv
