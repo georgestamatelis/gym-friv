@@ -6,7 +6,7 @@ from stable_baselines3.common.env_checker import check_env
 import random
 
 
-env = gym.make("gym_friv:chickenGoEnv-v1") 
+env = gym.make("gym_friv:pumpkin-v1") 
 
 check_env(env)
 #rendered=env.render(mode="rgb_array")

@@ -10,7 +10,7 @@ from stable_baselines3.common.noise import NormalActionNoise
 import numpy as np
 
 #env = gym.make("gym_slitherin:onionBoyEnv-v0") 
-env = gym.make("gym_friv:onionBoyEnv-v0") 
+env = gym.make("gym_friv:pumpkin-v3")
 #env = gym.make("gym_slitherin:chickenGoEnv-v0")
 
 print("FIRST WILL CHECK IF ENV IS OK")
@@ -25,15 +25,15 @@ print(env.action_space)
 
 model = DQN(
     'CnnPolicy', env, verbose=1,seed=185,
-    buffer_size=100000,optimize_memory_usage=True,learning_starts=4000,
+    buffer_size=125000,optimize_memory_usage=True,learning_starts=50000,
     create_eval_env=True) #try n_steps=6144
 
 model.learn(
-    total_timesteps= 2000000,eval_env=env,
-    eval_freq=100000,n_eval_episodes=5
+    total_timesteps= 600000,eval_env=env,
+    eval_freq=50000,n_eval_episodes=5
     ) 
 print("learning done") 
-model.save("DQN-ONION")
+model.save("DQN-PUMPKIN-3")
 #print("model Saved")
 obs = env.reset()
 for i in range(100000):

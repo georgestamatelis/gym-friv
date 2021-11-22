@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 from stable_baselines3.common.env_checker import check_env
 
 
-env = gym.make("gym_friv:pumpkin-v1") 
+env = gym.make("gym_friv:pumpkin-v3") 
 
 check_env(env)
 #rendered=env.render(mode="rgb_array")

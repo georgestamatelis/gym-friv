@@ -105,6 +105,33 @@ class evilcat(object):
         win.blit(self.img,(self.x,self.y))
         pygame.draw.rect(win, (255,0,0), self.hitbox,2)
 
+class evilPumpkin(object):
+    img=pygame.image.load(assetsPath+"evilPumpkin.png")
+    def __init__(self,x,y):
+        self.x=x
+        self.y=y 
+        self.hitbox = (self.x+2 , self.y+5, 85,85)
+
+        self.vel=4
+        self.hasLaned=False
+    def getHitbox(self):
+        return self.hitbox
+    def draw(self,win):
+        if self.y <=520:
+            self.y=self.y+10
+            self.hasLaned=True
+        else:
+            self.x=self.x+self.vel
+        if self.hasLaned==True:
+            self.hasLaned=False
+            if self.x <=man.x:
+                self.vel=5
+            else:
+                self.vel=-5
+        
+        self.hitbox = (self.x+2 , self.y+5, 85,85)
+        win.blit(self.img,(self.x,self.y))
+        pygame.draw.rect(win, (255,0,0), self.hitbox,2)
 
 
 
@@ -122,7 +149,7 @@ def redrawGameWindow():
     man.draw(win)
     for b in bullets:
         b.draw(win)
-    for c in evilcats:
+    for c in evilPumpkins:
         c.draw(win)
     ghost.draw(win)
     pygame.display.update()
@@ -136,10 +163,10 @@ man = player(50, 560, 64,64)
 ghost = Enemy(random.randrange(0,400),50)
 ghost.vel=random.choice([-4,4,-4.5,4.5])
 bullets=[]
-evilcats=[]
+evilPumpkins=[]
 run=True
 shootReset=0
-catReset=0
+pumpkinReset=0
 
 while run:
     clock.tick(27)
@@ -165,17 +192,22 @@ while run:
                     print("VICTORY")    
                     run=False
     #animate the cats
-    if catReset >=20:
-        catReset=0
-    if catReset>0:
-        catReset+=1
-    if catReset==0:
+    if pumpkinReset >=50:
+        pumpkinReset=0
+    if pumpkinReset>0:
+        pumpkinReset+=1
+    if pumpkinReset==0:
         #c=evilcat(ghost.x,ghost.y)
-        evilcats.append(evilcat(ghost.x,ghost.y))
-        catReset=1
-    for c in evilcats:
-        if c.lifeSpan<0:
-            evilcats.pop(evilcats.index(c))
+        ep=evilPumpkin(ghost.x,ghost.y)
+        if ghost.x <= man.x:
+            ep.vel=5
+        else:
+            ep.vel=-5
+        evilPumpkins.append(ep)
+        pumpkinReset=1
+    for c in evilPumpkins:
+        if c.x <=10 or c.x >= 640 :
+            evilPumpkins.pop(evilPumpkins.index(c))
         else:
             hitbox=c.hitbox
             rectA=pygame.Rect(hitbox)
@@ -185,7 +217,8 @@ while run:
                 if man.HP <=0:
                     print("GAME OVER")  
                     run=False
-                evilcats.pop(evilcats.index(c))
+                evilPumpkins.pop(evilPumpkins.index(c))
+
     
     keys = pygame.key.get_pressed()
 

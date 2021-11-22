@@ -1,4 +1,3 @@
-
 import pygame
 import random
 
@@ -17,13 +16,14 @@ import numpy as np
 
 STATE_W = 100  # less than Atari 160x192
 STATE_H = 100
-FPS =1 #pygame animation deals with FPS
+FPS =1 #pygame animation deals with fps
 
 assetsPath="bossLevelPumpkin/"
 walkRight = [pygame.image.load(assetsPath+'R1.png'), pygame.image.load(assetsPath+'R2.png'), pygame.image.load(assetsPath+'R3.png'), pygame.image.load(assetsPath+'R4.png'), pygame.image.load(assetsPath+'R5.png'), pygame.image.load(assetsPath+'R6.png'), pygame.image.load(assetsPath+'R7.png'), pygame.image.load(assetsPath+'R8.png'), pygame.image.load(assetsPath+'R9.png')]
 walkLeft = [pygame.image.load(assetsPath+'L1.png'), pygame.image.load(assetsPath+'L2.png'), pygame.image.load(assetsPath+'L3.png'), pygame.image.load(assetsPath+'L4.png'), pygame.image.load(assetsPath+'L5.png'), pygame.image.load(assetsPath+'L6.png'), pygame.image.load(assetsPath+'L7.png'), pygame.image.load(assetsPath+'L8.png'), pygame.image.load(assetsPath+'L9.png')]
 bg = pygame.image.load(assetsPath+'bg.png')
 bg = pygame.transform.scale(bg,(700,700))
+
 
 class player(object):
     def __init__(self,x,y,width,height):
@@ -68,7 +68,7 @@ class projectile(object):
         self.radius=radius
         self.color=color
         self.facing=facing #+-1
-        self.vel=16*facing
+        self.vel=8*facing
         self.hitbox=(self.x-self.radius,self.y-self.radius,2*self.radius,2*self.radius)
     def draw(self,win):
         self.hitbox=(self.x-self.radius,self.y-self.radius,2*self.radius,2*self.radius)
@@ -95,37 +95,50 @@ class Enemy(object):
         self.hitbox = (self.x +25 , self.y+25, 110,105)
         win.blit(self.img,(self.x,self.y))
         #pygame.draw.rect(win, (255,0,0), self.hitbox,2)
-class evilcat(object):
-    img=pygame.image.load(assetsPath+"evilCat.png")
+
+
+class evilPumpkin(object):
+    img=pygame.image.load(assetsPath+"evilPumpkin.png")
     def __init__(self,x,y):
         self.x=x
         self.y=y 
-        self.hitbox = (self.x+2 , self.y+5, 92,85)
+        self.hitbox = (self.x+2 , self.y+5, 85,85)
 
-        self.vel=15
-        self.lifeSpan=75
+        self.vel=17
+        self.hasLaned=False
     def getHitbox(self):
         return self.hitbox
-    def draw(self,win):
-        self.lifeSpan=self.lifeSpan-1
+    def draw(self,win,man):
         if self.y <=520:
-            self.y=self.y+self.vel
-        self.hitbox = (self.x+2 , self.y+5, 92,85)
+            self.y=self.y+17
+            self.hasLaned=True
+        else:
+            self.x=self.x+self.vel
+        if self.hasLaned==True:
+            self.hasLaned=False
+            if self.x <=man.x:
+                self.vel=4
+            else:
+                self.vel=-4
+        self.hitbox = (self.x+2 , self.y+5, 85,85)
         win.blit(self.img,(self.x,self.y))
         #pygame.draw.rect(win, (255,0,0), self.hitbox,2)
 
+"""
 
-class bossLevelPumpkin1(gym.Env):
+    ACTUAL ENVIRONMENT
+
+"""
+class bossLevelPumpkin3(gym.Env):
     metadata = {
         "render.modes": ["human", "rgb_array", "state_pixels"],
         "video.frames_per_second": FPS,
     }
-
     def __init__(self, verbose=1):
         pygame.init()
         self.win = pygame.display.set_mode((700,700))
         self.viewer=None
-        pygame.display.set_caption("Boss Level Pumpkin")
+        pygame.display.set_caption("Boss Level Pumpkin 3")
         """
         actions are 
         0 do nothing 
@@ -156,16 +169,14 @@ class bossLevelPumpkin1(gym.Env):
         self.ghost = Enemy(random.randrange(0,400),50)
         self.ghost.vel=random.choice([-4,4,-4.5,4.5])
         self.bullets=[]
-        self.evilcats=[]
+        self.evilPumpkins=[]
         self.shootReset=0
         self.catReset=0
         observation=self.render(mode="state_pixels")#self.get_state()
         self.render(mode='human')
-        #state = np.fliplr(np.flip(np.rot90(pygame.surfarray.array3d(
-        #     pygame.display.get_surface()).astype(np.uint8))))
+        
         return observation
     def step(self,action):
-
         #animate the bullets
         reward=0
         done = False
@@ -185,29 +196,28 @@ class bossLevelPumpkin1(gym.Env):
                     self.bullets.pop(self.bullets.index(b))
 
         #animate the cats
-        if self.catReset >=16:
+        if self.catReset >=15:
             self.catReset=0
         if self.catReset>0:
             self.catReset+=1
         if self.catReset==0 and random.randrange(0,1)<=0.65:
-            #c=evilcat(ghost.x,ghost.y)
-            self.evilcats.append(evilcat(self.ghost.x,self.ghost.y))
+            #c=evilPumpkin(ghost.x,ghost.y)
+            self.evilPumpkins.append(evilPumpkin(self.ghost.x,self.ghost.y))
             self.catReset=1
-        for c in self.evilcats:
-            if c.lifeSpan<0:
-                self.evilcats.pop(self.evilcats.index(c))
+        for c in self.evilPumpkins:
+            if c.x <=10 or c.x >= 640 :
+                self.evilPumpkins.pop(self.evilPumpkins.index(c))
             else:
                 hitbox=c.hitbox
                 rectA=pygame.Rect(hitbox)
                 rectB=pygame.Rect(self.man.hitbox)
                 if pygame.Rect.colliderect(rectA,rectB)==True:
                     self.man.HP=self.man.HP-25
-                    reward=reward -25/100
-
+                    reward=reward-25/100
                     if self.man.HP <=0:
                         done=True
                         print("GAME OVER")
-                    self.evilcats.pop(self.evilcats.index(c))
+                    self.evilPumpkins.pop(self.evilPumpkins.index(c))
         """
             actions are 
             0 do nothing 
@@ -278,9 +288,6 @@ class bossLevelPumpkin1(gym.Env):
         self.render(mode='human')
         
         return state,reward,done,{}
-        
-
-
     def get_state(self):
         state = np.fliplr(np.flip(np.rot90(pygame.surfarray.array3d(
             pygame.display.get_surface()).astype(np.uint8))))
@@ -298,7 +305,7 @@ class bossLevelPumpkin1(gym.Env):
             img = self.get_state()
             img=cv2.resize(img,(STATE_H,STATE_W))
             return img
-    def redraw(self, mode="human"):
+    def redraw(self,mode="human"):
         self.win.blit(bg, (0,0))
         textsurface = self.font.render('ENEMY', False, (0, 0, 0))
         textsurface2 = self.font.render('PLAYER', False, (0, 0, 0))
@@ -312,15 +319,16 @@ class bossLevelPumpkin1(gym.Env):
         self.man.draw(self.win)
         for b in self.bullets:
             b.draw(self.win)
-        for c in self.evilcats:
-            c.draw(self.win)
+        for c in self.evilPumpkins:
+            c.draw(self.win,self.man)
         self.ghost.draw(self.win)
         pygame.display.update()
+    
 #main function for user play
 #just type python3 <path to file> /eyeCopterEnv1.py to play as a human agent
 if __name__ == "__main__":
     run=True
-    env=bossLevelPumpkin1()
+    env=bossLevelPumpkin3()
     env.reset()
     totalRew=0
     while run:

@@ -20,7 +20,7 @@ STATE_H = 96
 FPS = 1  # Frames are taken care of by pygame
 
 #global variables determining where the sprites for animation are placed 
-assetsPath="/home/georgestamatelis/gym-friv/eyeCopter/"
+assetsPath="eyeCopter/"
 flying = [pygame.image.load(assetsPath+'F1.png'), pygame.image.load(assetsPath+'F2.png'), pygame.image.load(assetsPath+'F3.png'), pygame.image.load(assetsPath+'F4.png'), pygame.image.load(assetsPath+'F5.png')]
 bg = pygame.image.load('/home/georgestamatelis/gym-friv/eyeCopter/EyeCopterBG.png')
 bg = pygame.transform.scale(bg,(900,700))

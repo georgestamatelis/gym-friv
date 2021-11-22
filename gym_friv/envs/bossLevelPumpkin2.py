@@ -2,7 +2,13 @@
 import pygame
 import random
 
+"""
+    This environment, is the same as boss level pumpkin one. The only difference is that
+the boss has a little more health and moves slightly faster, the cats move downwards 
+a  little faster and they last for a little longer. The player causes less damage 
+to the boss.
 
+"""
 #gym imports
 import gym
 from gym import spaces
@@ -83,7 +89,7 @@ class Enemy(object):
         self.y=y 
         self.hitbox = (self.x +25 , self.y+25, 110,105)
         self.vel=4
-        self.HP=500
+        self.HP=750
 
     def draw(self,win):
         if self.x >=560:
@@ -102,8 +108,8 @@ class evilcat(object):
         self.y=y 
         self.hitbox = (self.x+2 , self.y+5, 92,85)
 
-        self.vel=15
-        self.lifeSpan=75
+        self.vel=17
+        self.lifeSpan=100
     def getHitbox(self):
         return self.hitbox
     def draw(self,win):
@@ -115,7 +121,7 @@ class evilcat(object):
         #pygame.draw.rect(win, (255,0,0), self.hitbox,2)
 
 
-class bossLevelPumpkin1(gym.Env):
+class bossLevelPumpkin2(gym.Env):
     metadata = {
         "render.modes": ["human", "rgb_array", "state_pixels"],
         "video.frames_per_second": FPS,
@@ -154,7 +160,7 @@ class bossLevelPumpkin1(gym.Env):
         self.font = pygame.font.SysFont('comicsans', 30, True)
         self.man = player(50, 560, 64,64)
         self.ghost = Enemy(random.randrange(0,400),50)
-        self.ghost.vel=random.choice([-4,4,-4.5,4.5])
+        self.ghost.vel=random.choice([-4.5,4.5,-5,5,-4.75,4.75,-5.2,5.2])
         self.bullets=[]
         self.evilcats=[]
         self.shootReset=0
@@ -177,8 +183,8 @@ class bossLevelPumpkin1(gym.Env):
                 rectA=pygame.Rect(b.hitbox)
                 rectB=pygame.Rect(self.ghost.hitbox)
                 if pygame.Rect.colliderect(rectA,rectB)==True:
-                    self.ghost.HP=self.ghost.HP-25
-                    reward = reward + 25/500
+                    self.ghost.HP=self.ghost.HP-20
+                    reward = reward + 20/750
                     if self.ghost.HP <=0:
                         print("VICTORY")   
                         done=True
@@ -202,7 +208,7 @@ class bossLevelPumpkin1(gym.Env):
                 rectB=pygame.Rect(self.man.hitbox)
                 if pygame.Rect.colliderect(rectA,rectB)==True:
                     self.man.HP=self.man.HP-25
-                    reward=reward -25/100
+                    reward=reward - 25/100
 
                     if self.man.HP <=0:
                         done=True
@@ -320,7 +326,7 @@ class bossLevelPumpkin1(gym.Env):
 #just type python3 <path to file> /eyeCopterEnv1.py to play as a human agent
 if __name__ == "__main__":
     run=True
-    env=bossLevelPumpkin1()
+    env=bossLevelPumpkin2()
     env.reset()
     totalRew=0
     while run:

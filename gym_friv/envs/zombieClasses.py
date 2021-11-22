@@ -1,6 +1,6 @@
 import pygame
 
-assetsPath="/home/georgestamatelis/gym-slitherin/zombieOnslaugt/"
+assetsPath="./zombieOnslaugt/"
 class player(object):
     images = [pygame.image.load(assetsPath+'R1.png'), pygame.image.load(assetsPath+'R2.png'), pygame.image.load(assetsPath+'R3.png'), pygame.image.load(assetsPath+'R4.png'), pygame.image.load(assetsPath+'R5.png'), pygame.image.load(assetsPath+'R6.png'), pygame.image.load(assetsPath+'R7.png'), pygame.image.load(assetsPath+'R8.png'), pygame.image.load(assetsPath+'R9.png')]
 
