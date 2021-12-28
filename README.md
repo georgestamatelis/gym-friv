@@ -53,6 +53,7 @@ Feel free to play arround with them
 
 # Citation
 If you use F.L.E in your research please cite:
+```bibtex
 @misc{2968651,
     title = "The Friv Reinforcement Learning Environment",
     authorField = "ΣΤΑΜΑΤΕΛΗΣ, ΓΕΩΡΓΙΟΣ",
