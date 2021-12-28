@@ -51,7 +51,7 @@ Feel free to play arround with them
 
 ![bossLvlPumpkin1](https://user-images.githubusercontent.com/52538570/145851706-0f1fa854-bb0f-4776-8b08-d712acb5cb43.png)
 
-#Citation
+# Citation
 If you use F.L.E in your research please cite:
 @misc{2968651,
     title = "The Friv Reinforcement Learning Environment",
